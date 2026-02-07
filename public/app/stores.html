@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Mes boutiques — Scalevo</title>
+  <link rel="stylesheet" href="/css/main.css">
+  <link rel="stylesheet" href="/css/dashboard.css">
+</head>
+<body>
+  <div class="dashboard-layout">
+    <!-- SIDEBAR ────────────────────────────── -->
+    <aside class="sidebar" id="sidebar">
+      <div class="sidebar-logo"><span class="logo-icon">⚡</span> Scalevo</div>
+      <nav class="sidebar-nav">
+        <a href="/app/index.html" class="sidebar-link" data-page="dashboard">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
+          Dashboard
+        </a>
+        <a href="/app/stores.html" class="sidebar-link active" data-page="stores">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+          Mes boutiques
+        </a>
+        <a href="/app/account.html" class="sidebar-link" data-page="account">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+          Mon compte
+        </a>
+      </nav>
+      <div class="sidebar-footer">
+        <div class="sidebar-plan" id="sidebarPlan"><span class="badge badge-outline">Free</span></div>
+        <button class="sidebar-link" onclick="Auth.signOut()">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+          Déconnexion
+        </button>
+      </div>
+    </aside>
+
+    <main class="dashboard-main">
+      <header class="topbar">
+        <button class="mobile-sidebar-toggle" id="sidebarToggle">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+        </button>
+        <h1 class="topbar-title">Mes boutiques</h1>
+        <div class="topbar-right">
+          <a href="/app/new-store.html" class="btn btn-primary btn-sm">+ Nouvelle boutique</a>
+        </div>
+      </header>
+
+      <div class="dashboard-content" id="content">
+        <div class="loading-spinner" id="loader"><div class="spinner"></div></div>
+        <div id="storesList" class="stores-grid" style="display:none;"></div>
+        <div id="noStores" class="empty-state" style="display:none;">
+          <h3>Aucune boutique</h3>
+          <p>Crée ta première boutique pour commencer à vendre.</p>
+          <a href="/app/new-store.html" class="btn btn-primary">Créer ma boutique</a>
+        </div>
+        <div id="limitReached" class="empty-state" style="display:none;">
+          <p style="color:var(--warning);">⚠️ Tu as atteint la limite de boutiques de ton plan.</p>
+          <button class="btn btn-primary" onclick="upgradePlan()">Upgrader mon plan</button>
+        </div>
+      </div>
+    </main>
+  </div>
+  <div class="sidebar-overlay" id="sidebarOverlay"></div>
+
+  <!-- Firebase SDK -->
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+  <script src="https://js.stripe.com/v3/"></script>
+  <script src="/js/firebase-config.js"></script>
+  <script src="/js/utils.js"></script>
+  <script src="/js/auth.js"></script>
+  <script src="/js/api.js"></script>
+  <script src="/js/db.js"></script>
+  <script>
+    // Mobile sidebar
+    document.getElementById('sidebarToggle').addEventListener('click', () => {
+      document.getElementById('sidebar').classList.toggle('open');
+      document.getElementById('sidebarOverlay').classList.toggle('visible');
+    });
+    document.getElementById('sidebarOverlay').addEventListener('click', () => {
+      document.getElementById('sidebar').classList.remove('open');
+      document.getElementById('sidebarOverlay').classList.remove('visible');
+    });
+
+    async function upgradePlan() {
+      try {
+        const { sessionId } = await API.createSubscriptionCheckout('pro');
+        const stripe = getStripePlatform();
+        await stripe.redirectToCheckout({ sessionId });
+      } catch(e) { Utils.toast('Erreur: ' + e.message, 'error'); }
+    }
+
+    Auth.init(async (user) => {
+      if (!user) { window.location.href = '/login.html'; return; }
+
+      const sub = await Auth.loadSubscription();
+      const planName = sub?.plan || 'free';
+      const limits = Auth.getPlanLimits(planName);
+      document.getElementById('sidebarPlan').innerHTML =
+        `<span class="badge ${planName === 'pro' ? 'badge-primary' : planName === 'scale' ? 'badge-success' : 'badge-outline'}">${planName.charAt(0).toUpperCase() + planName.slice(1)}</span>`;
+
+      const stores = await DB.getStores(user.uid);
+      document.getElementById('loader').style.display = 'none';
+
+      if (stores.length === 0) {
+        document.getElementById('noStores').style.display = '';
+      } else {
+        document.getElementById('storesList').style.display = '';
+        document.getElementById('storesList').innerHTML = stores.map(store => `
+          <a href="/app/store.html?id=${store.id}" class="store-card">
+            <div class="store-card-header">
+              <h3>${Utils.escapeHtml(store.name)}</h3>
+              <span class="badge ${store.published ? 'badge-success' : 'badge-outline'}">${store.published ? 'En ligne' : 'Brouillon'}</span>
+            </div>
+            <p class="store-card-slug">${store.slug}.${ROOT_DOMAIN}</p>
+            <div class="store-card-footer">
+              <span>${store.productCount || 0} produit(s)</span>
+            </div>
+          </a>
+        `).join('');
+      }
+
+      // Check if can create more stores
+      if (stores.length >= limits.maxStores) {
+        document.getElementById('limitReached').style.display = '';
+        document.querySelector('.topbar-right .btn').style.display = 'none';
+      }
+    });
+  </script>
+</body>
+</html>

@@ -1,0 +1,379 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title id="pageTitle">Boutique</title>
+  <meta name="description" id="pageMeta" content="">
+  <link rel="stylesheet" href="/css/main.css">
+  <link rel="stylesheet" href="/css/storefront.css">
+</head>
+<body class="storefront">
+  <!-- COUNTDOWN BAR ────────────────────────── -->
+  <div class="countdown-bar" id="countdownBar" style="display:none;">
+    <span>🔥 Offre spéciale expire dans <strong id="countdownTimer">15:00</strong></span>
+  </div>
+
+  <!-- LOADING STATE ────────────────────────── -->
+  <div class="storefront-loader" id="loader">
+    <div class="spinner"></div>
+    <p>Chargement de la boutique...</p>
+  </div>
+
+  <!-- 404 STATE ────────────────────────────── -->
+  <div class="storefront-404" id="notFound" style="display:none;">
+    <h1>Boutique introuvable</h1>
+    <p>Cette boutique n'existe pas ou n'est plus disponible.</p>
+    <a href="https://scalevo.shop" class="btn btn-primary">Retour à Scalevo</a>
+  </div>
+
+  <!-- MAIN PRODUCT PAGE ────────────────────── -->
+  <div id="productPage" style="display:none;">
+    <!-- HERO ───────────────────────────────── -->
+    <section class="sf-hero">
+      <div class="sf-container sf-hero-grid">
+        <!-- Gallery -->
+        <div class="sf-gallery">
+          <div class="sf-gallery-main">
+            <img id="mainImage" src="" alt="">
+          </div>
+          <div class="sf-gallery-thumbs" id="thumbs"></div>
+        </div>
+        <!-- Product Info -->
+        <div class="sf-product-info">
+          <h1 id="productName"></h1>
+          <div class="sf-price">
+            <span class="sf-price-current" id="priceDisplay"></span>
+            <span class="sf-price-compare" id="comparePriceDisplay"></span>
+            <span class="sf-price-badge" id="discountBadge" style="display:none;"></span>
+          </div>
+          <div class="sf-features" id="featuresDisplay"></div>
+
+          <!-- Bundles -->
+          <div class="sf-bundles" id="bundlesSection" style="display:none;">
+            <h3>Choisissez votre offre :</h3>
+            <div id="bundlesList"></div>
+          </div>
+
+          <!-- Order Bump -->
+          <div class="sf-order-bump" id="bumpSection" style="display:none;">
+            <label class="sf-bump-label">
+              <input type="checkbox" id="bumpCheckbox">
+              <div class="sf-bump-content">
+                <strong id="bumpTitle"></strong>
+                <span id="bumpDesc"></span>
+                <span class="sf-bump-price" id="bumpPriceDisplay"></span>
+              </div>
+            </label>
+          </div>
+
+          <!-- CTA -->
+          <button class="sf-cta-btn" id="ctaBtn" onclick="startCheckout()">
+            🛒 Commander maintenant
+          </button>
+
+          <!-- Trust badges -->
+          <div class="sf-trust-badges">
+            <div class="sf-trust-badge">🔒 Paiement sécurisé</div>
+            <div class="sf-trust-badge">🚚 Livraison offerte</div>
+            <div class="sf-trust-badge">↩️ Satisfait ou remboursé</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- DESCRIPTION ────────────────────────── -->
+    <section class="sf-section" id="descriptionSection" style="display:none;">
+      <div class="sf-container">
+        <h2>À propos du produit</h2>
+        <div id="descriptionContent" class="sf-description"></div>
+      </div>
+    </section>
+
+    <!-- GUARANTEE ──────────────────────────── -->
+    <section class="sf-guarantee">
+      <div class="sf-container">
+        <div class="sf-guarantee-box">
+          <div class="sf-guarantee-icon">🛡️</div>
+          <h3>Garantie satisfaction 30 jours</h3>
+          <p>Si tu n'es pas satisfait, on te rembourse sans poser de questions. Zéro risque.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- REVIEWS ────────────────────────────── -->
+    <section class="sf-section sf-reviews-section">
+      <div class="sf-container">
+        <h2>Ce que disent nos clients</h2>
+        <div class="sf-reviews-grid">
+          <div class="sf-review">
+            <div class="sf-review-stars">★★★★★</div>
+            <p>"Produit top qualité, je recommande à 100% !"</p>
+            <strong>Marie P.</strong>
+          </div>
+          <div class="sf-review">
+            <div class="sf-review-stars">★★★★★</div>
+            <p>"Livraison rapide et conforme à la description. Très content."</p>
+            <strong>Thomas R.</strong>
+          </div>
+          <div class="sf-review">
+            <div class="sf-review-stars">★★★★★</div>
+            <p>"Super rapport qualité/prix. J'en ai commandé 2 de plus !"</p>
+            <strong>Sophie M.</strong>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- FAQ ─────────────────────────────────── -->
+    <section class="sf-section sf-faq-section">
+      <div class="sf-container">
+        <h2>Questions fréquentes</h2>
+        <div class="sf-faq-list">
+          <div class="sf-faq-item">
+            <button class="sf-faq-question" onclick="toggleFaq(this)">
+              Quels sont les délais de livraison ? <span class="sf-faq-arrow">▾</span>
+            </button>
+            <div class="sf-faq-answer">La livraison prend entre 7 et 14 jours ouvrés. Vous recevrez un email avec le numéro de suivi dès l'expédition.</div>
+          </div>
+          <div class="sf-faq-item">
+            <button class="sf-faq-question" onclick="toggleFaq(this)">
+              Comment fonctionne le remboursement ? <span class="sf-faq-arrow">▾</span>
+            </button>
+            <div class="sf-faq-answer">Contactez-nous dans les 30 jours suivant la réception. Nous vous remboursons intégralement sans condition.</div>
+          </div>
+          <div class="sf-faq-item">
+            <button class="sf-faq-question" onclick="toggleFaq(this)">
+              Le paiement est-il sécurisé ? <span class="sf-faq-arrow">▾</span>
+            </button>
+            <div class="sf-faq-answer">Oui, tous les paiements sont traités par Stripe, le leader mondial du paiement en ligne. Vos données bancaires sont 100% sécurisées.</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- STICKY MOBILE CTA ──────────────────── -->
+    <div class="sf-sticky-cta">
+      <button class="sf-cta-btn" onclick="startCheckout()">🛒 Commander maintenant — <span id="stickyPrice"></span></button>
+    </div>
+  </div>
+
+  <!-- Firebase + Scripts ───────────────────── -->
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+  <script src="https://js.stripe.com/v3/"></script>
+  <script src="/js/firebase-config.js"></script>
+  <script src="/js/utils.js"></script>
+  <script src="/js/store-resolver.js"></script>
+  <script>
+    let storeData = null;
+    let productData = null;
+    let funnelData = null;
+    let selectedBundle = null;
+    let bumpSelected = false;
+
+    function toggleFaq(btn) {
+      btn.parentElement.classList.toggle('open');
+    }
+
+    function selectBundle(index) {
+      document.querySelectorAll('.sf-bundle-option').forEach((el, i) => {
+        el.classList.toggle('selected', i === index);
+      });
+      selectedBundle = funnelData.bundles[index];
+      updatePrice();
+    }
+
+    function updatePrice() {
+      let basePrice = productData.price;
+      let label = Utils.formatPrice(basePrice);
+
+      if (selectedBundle) {
+        basePrice = selectedBundle.unitPrice * selectedBundle.qty;
+        label = Utils.formatPrice(basePrice);
+      }
+
+      let total = basePrice;
+      if (bumpSelected && funnelData?.orderBump?.price) {
+        total += funnelData.orderBump.price;
+      }
+
+      document.getElementById('priceDisplay').textContent = Utils.formatPrice(total);
+      document.getElementById('stickyPrice').textContent = Utils.formatPrice(total);
+    }
+
+    async function startCheckout() {
+      const btn = document.getElementById('ctaBtn');
+      btn.disabled = true;
+      btn.textContent = 'Redirection vers le paiement...';
+
+      try {
+        const body = {
+          storeId: storeData.id,
+          productId: productData.id,
+          bundleIndex: selectedBundle ? funnelData.bundles.indexOf(selectedBundle) : null,
+          includeOrderBump: bumpSelected,
+          successUrl: window.location.origin + '/success.html?store=' + storeData.id,
+          cancelUrl: window.location.href
+        };
+
+        const res = await fetch('/api/createStoreCheckoutSession', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(body)
+        });
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.error || 'Erreur checkout');
+
+        const stripe = getStripeForStore(storeData.stripePublishableKey);
+        await stripe.redirectToCheckout({ sessionId: data.sessionId });
+      } catch(e) {
+        alert('Erreur: ' + e.message);
+        btn.disabled = false;
+        btn.textContent = '🛒 Commander maintenant';
+      }
+    }
+
+    // ─── Countdown ───
+    function startCountdown(minutes) {
+      document.getElementById('countdownBar').style.display = '';
+      let seconds = minutes * 60;
+      const timerEl = document.getElementById('countdownTimer');
+      const interval = setInterval(() => {
+        seconds--;
+        if (seconds <= 0) { clearInterval(interval); return; }
+        const m = Math.floor(seconds / 60);
+        const s = seconds % 60;
+        timerEl.textContent = m.toString().padStart(2, '0') + ':' + s.toString().padStart(2, '0');
+      }, 1000);
+    }
+
+    // ─── INIT ───
+    async function init() {
+      const slug = StoreResolver.getSlug();
+
+      // If no slug, we might be on a direct URL — try query param
+      const urlSlug = slug || new URLSearchParams(window.location.search).get('slug');
+
+      if (!urlSlug) {
+        document.getElementById('loader').style.display = 'none';
+        document.getElementById('notFound').style.display = '';
+        return;
+      }
+
+      // Resolve slug → storeId
+      const storeId = await StoreResolver.resolve(urlSlug);
+      if (!storeId) {
+        document.getElementById('loader').style.display = 'none';
+        document.getElementById('notFound').style.display = '';
+        return;
+      }
+
+      // Load store
+      storeData = await StoreResolver.loadStore(storeId);
+      if (!storeData || !storeData.published) {
+        document.getElementById('loader').style.display = 'none';
+        document.getElementById('notFound').style.display = '';
+        return;
+      }
+
+      // Load product
+      productData = await StoreResolver.loadProduct(storeId);
+      if (!productData) {
+        document.getElementById('loader').style.display = 'none';
+        document.getElementById('notFound').style.display = '';
+        return;
+      }
+
+      // Load funnel
+      funnelData = await StoreResolver.loadFunnel(storeId);
+
+      // Apply theme color
+      if (storeData.primaryColor) {
+        document.documentElement.style.setProperty('--sf-primary', storeData.primaryColor);
+      }
+
+      // Title
+      document.getElementById('pageTitle').textContent = productData.name + ' — ' + storeData.name;
+      document.getElementById('pageMeta').content = productData.description || '';
+
+      // Product name
+      document.getElementById('productName').textContent = productData.name;
+
+      // Price
+      document.getElementById('priceDisplay').textContent = Utils.formatPrice(productData.price);
+      document.getElementById('stickyPrice').textContent = Utils.formatPrice(productData.price);
+      if (productData.comparePrice && productData.comparePrice > productData.price) {
+        document.getElementById('comparePriceDisplay').textContent = Utils.formatPrice(productData.comparePrice);
+        const discount = Math.round((1 - productData.price / productData.comparePrice) * 100);
+        document.getElementById('discountBadge').textContent = '-' + discount + '%';
+        document.getElementById('discountBadge').style.display = '';
+      }
+
+      // Gallery
+      if (productData.images && productData.images.length > 0) {
+        document.getElementById('mainImage').src = productData.images[0];
+        document.getElementById('mainImage').alt = productData.name;
+        document.getElementById('thumbs').innerHTML = productData.images.map((img, i) => `
+          <img src="${Utils.escapeHtml(img)}" alt="" class="sf-thumb ${i === 0 ? 'active' : ''}"
+               onclick="document.getElementById('mainImage').src='${Utils.escapeHtml(img)}'; document.querySelectorAll('.sf-thumb').forEach(t=>t.classList.remove('active')); this.classList.add('active');">
+        `).join('');
+      }
+
+      // Features
+      if (productData.features && productData.features.length > 0) {
+        document.getElementById('featuresDisplay').innerHTML = productData.features.map(f =>
+          `<div class="sf-feature">${Utils.escapeHtml(f)}</div>`
+        ).join('');
+      }
+
+      // Description
+      if (productData.description) {
+        document.getElementById('descriptionSection').style.display = '';
+        document.getElementById('descriptionContent').textContent = productData.description;
+      }
+
+      // Bundles
+      if (funnelData?.bundles && funnelData.bundles.length > 0) {
+        document.getElementById('bundlesSection').style.display = '';
+        document.getElementById('bundlesList').innerHTML = funnelData.bundles.map((b, i) => `
+          <div class="sf-bundle-option ${i === 0 ? 'selected' : ''}" onclick="selectBundle(${i})">
+            <div class="sf-bundle-radio"></div>
+            <div class="sf-bundle-info">
+              <strong>${Utils.escapeHtml(b.label)}</strong>
+              <span>${b.qty}x — ${Utils.formatPrice(b.unitPrice)}/unité</span>
+            </div>
+            <div class="sf-bundle-total">${Utils.formatPrice(b.unitPrice * b.qty)}</div>
+            ${b.badge ? `<span class="sf-bundle-badge">${Utils.escapeHtml(b.badge)}</span>` : ''}
+          </div>
+        `).join('');
+        selectedBundle = funnelData.bundles[0];
+        updatePrice();
+      }
+
+      // Order Bump
+      if (funnelData?.orderBump?.title) {
+        document.getElementById('bumpSection').style.display = '';
+        document.getElementById('bumpTitle').textContent = funnelData.orderBump.title;
+        document.getElementById('bumpDesc').textContent = funnelData.orderBump.description || '';
+        document.getElementById('bumpPriceDisplay').textContent = '+ ' + Utils.formatPrice(funnelData.orderBump.price);
+        document.getElementById('bumpCheckbox').addEventListener('change', (e) => {
+          bumpSelected = e.target.checked;
+          updatePrice();
+        });
+      }
+
+      // Countdown
+      if (funnelData?.countdownMinutes) {
+        startCountdown(funnelData.countdownMinutes);
+      }
+
+      // Show page
+      document.getElementById('loader').style.display = 'none';
+      document.getElementById('productPage').style.display = '';
+    }
+
+    init();
+  </script>
+</body>
+</html>

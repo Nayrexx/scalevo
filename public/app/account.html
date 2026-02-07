@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Mon compte — Scalevo</title>
+  <link rel="stylesheet" href="/css/main.css">
+  <link rel="stylesheet" href="/css/dashboard.css">
+</head>
+<body>
+  <div class="dashboard-layout">
+    <aside class="sidebar" id="sidebar">
+      <div class="sidebar-logo"><span class="logo-icon">⚡</span> Scalevo</div>
+      <nav class="sidebar-nav">
+        <a href="/app/index.html" class="sidebar-link"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg> Dashboard</a>
+        <a href="/app/stores.html" class="sidebar-link"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg> Mes boutiques</a>
+        <a href="/app/account.html" class="sidebar-link active"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg> Mon compte</a>
+      </nav>
+      <div class="sidebar-footer">
+        <button class="sidebar-link" onclick="Auth.signOut()"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg> Déconnexion</button>
+      </div>
+    </aside>
+
+    <main class="dashboard-main">
+      <header class="topbar">
+        <button class="mobile-sidebar-toggle" id="sidebarToggle"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="18" x2="21" y2="18"/></svg></button>
+        <h1 class="topbar-title">Mon compte</h1>
+        <div class="topbar-right"></div>
+      </header>
+
+      <div class="dashboard-content">
+        <div class="loading-spinner" id="loader"><div class="spinner"></div></div>
+
+        <div id="accountContent" style="display:none; max-width:600px;">
+          <!-- PROFILE -->
+          <div class="card" style="margin-bottom:2rem;">
+            <div class="card-body">
+              <h3 style="margin-bottom:1rem;">Profil</h3>
+              <form id="profileForm">
+                <div class="form-group" style="margin-bottom:1rem;">
+                  <label class="form-label">Nom</label>
+                  <input type="text" id="profileName" class="input" required>
+                </div>
+                <div class="form-group" style="margin-bottom:1rem;">
+                  <label class="form-label">Email</label>
+                  <input type="email" id="profileEmail" class="input" disabled>
+                </div>
+                <button type="submit" class="btn btn-primary">Sauvegarder</button>
+              </form>
+            </div>
+          </div>
+
+          <!-- SUBSCRIPTION -->
+          <div class="card" style="margin-bottom:2rem;">
+            <div class="card-body">
+              <h3 style="margin-bottom:1rem;">Abonnement</h3>
+              <div id="subInfo">
+                <div style="display:flex; align-items:center; gap:1rem; margin-bottom:1rem;">
+                  <span class="badge badge-outline" id="subPlan" style="font-size:1rem; padding:0.5rem 1rem;">Free</span>
+                  <span id="subStatus" style="color:var(--text-secondary);"></span>
+                </div>
+                <div id="subLimits" style="font-size:0.875rem; color:var(--text-secondary); margin-bottom:1rem;"></div>
+              </div>
+              <div style="display:flex; gap:1rem; flex-wrap:wrap;">
+                <button class="btn btn-primary" id="upgradeBtn" onclick="subscribePlan('pro')">Upgrader en Pro (59€/mois)</button>
+                <button class="btn btn-outline" id="portalBtn" onclick="openBillingPortal()">Gérer la facturation</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </main>
+  </div>
+  <div class="sidebar-overlay" id="sidebarOverlay"></div>
+
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+  <script src="https://js.stripe.com/v3/"></script>
+  <script src="/js/firebase-config.js"></script>
+  <script src="/js/utils.js"></script>
+  <script src="/js/auth.js"></script>
+  <script src="/js/api.js"></script>
+  <script src="/js/db.js"></script>
+  <script>
+    // Mobile sidebar
+    document.getElementById('sidebarToggle').addEventListener('click', () => {
+      document.getElementById('sidebar').classList.toggle('open');
+      document.getElementById('sidebarOverlay').classList.toggle('visible');
+    });
+    document.getElementById('sidebarOverlay').addEventListener('click', () => {
+      document.getElementById('sidebar').classList.remove('open');
+      document.getElementById('sidebarOverlay').classList.remove('visible');
+    });
+
+    async function subscribePlan(plan) {
+      try {
+        const { sessionId } = await API.createSubscriptionCheckout(plan);
+        const stripe = getStripePlatform();
+        await stripe.redirectToCheckout({ sessionId });
+      } catch(e) { Utils.toast('Erreur: ' + e.message, 'error'); }
+    }
+
+    async function openBillingPortal() {
+      try {
+        const { url } = await API.createBillingPortal();
+        window.location.href = url;
+      } catch(e) { Utils.toast('Erreur: ' + e.message, 'error'); }
+    }
+
+    document.getElementById('profileForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const name = document.getElementById('profileName').value.trim();
+      try {
+        await auth.currentUser.updateProfile({ displayName: name });
+        await DB.updateUser(auth.currentUser.uid, { name });
+        Utils.toast('Profil mis à jour', 'success');
+      } catch(e) { Utils.toast('Erreur: ' + e.message, 'error'); }
+    });
+
+    Auth.init(async (user) => {
+      if (!user) { window.location.href = '/login.html'; return; }
+
+      document.getElementById('profileName').value = user.displayName || '';
+      document.getElementById('profileEmail').value = user.email || '';
+
+      const sub = await Auth.loadSubscription();
+      const planName = sub?.plan || 'free';
+      const limits = Auth.getPlanLimits(planName);
+
+      document.getElementById('subPlan').textContent = planName.charAt(0).toUpperCase() + planName.slice(1);
+      document.getElementById('subPlan').className = `badge ${planName === 'pro' ? 'badge-primary' : planName === 'scale' ? 'badge-success' : 'badge-outline'}`;
+      document.getElementById('subStatus').textContent = sub?.status === 'active' ? 'Actif' : sub?.status || '';
+      document.getElementById('subLimits').textContent = `${limits.maxStores} boutique(s) · ${limits.maxProductsPerStore} produit(s)/boutique · ${limits.upsell ? 'Upsell activé' : 'Pas d\'upsell'}`;
+
+      if (planName === 'pro') {
+        document.getElementById('upgradeBtn').textContent = 'Upgrader en Scale (99€/mois)';
+        document.getElementById('upgradeBtn').onclick = () => subscribePlan('scale');
+      } else if (planName === 'scale') {
+        document.getElementById('upgradeBtn').style.display = 'none';
+      }
+
+      document.getElementById('loader').style.display = 'none';
+      document.getElementById('accountContent').style.display = '';
+    });
+  </script>
+</body>
+</html>

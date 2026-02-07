@@ -1,0 +1,64 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // --- USERS ---
+    match /users/{userId} {
+      allow read, update: if request.auth != null && request.auth.uid == userId;
+      allow create: if request.auth != null && request.auth.uid == userId;
+      allow delete: if false;
+    }
+
+    // --- SUBSCRIPTIONS (written by Cloud Functions only) ---
+    match /subscriptions/{userId} {
+      allow read: if request.auth != null && request.auth.uid == userId;
+      allow write: if false;
+    }
+
+    // --- STORES ---
+    match /stores/{storeId} {
+      // Owner full access
+      allow read, update, delete: if request.auth != null && resource.data.ownerId == request.auth.uid;
+      allow create: if request.auth != null && request.resource.data.ownerId == request.auth.uid;
+      // Public: read published stores (for storefront)
+      allow get: if resource.data.published == true;
+    }
+
+    // --- PRODUCTS (subcollection of store) ---
+    match /stores/{storeId}/products/{productId} {
+      // Owner full access
+      allow read, write: if request.auth != null
+        && get(/databases/$(database)/documents/stores/$(storeId)).data.ownerId == request.auth.uid;
+      // Public: read published products of published stores
+      allow read: if get(/databases/$(database)/documents/stores/$(storeId)).data.published == true
+        && resource.data.published == true;
+    }
+
+    // --- FUNNELS (subcollection of store) ---
+    match /stores/{storeId}/funnels/{funnelId} {
+      allow read, write: if request.auth != null
+        && get(/databases/$(database)/documents/stores/$(storeId)).data.ownerId == request.auth.uid;
+      // Public read for storefront
+      allow read: if get(/databases/$(database)/documents/stores/$(storeId)).data.published == true;
+    }
+
+    // --- ORDERS (subcollection of store) — written by Cloud Functions ---
+    match /stores/{storeId}/orders/{orderId} {
+      allow read: if request.auth != null
+        && get(/databases/$(database)/documents/stores/$(storeId)).data.ownerId == request.auth.uid;
+      allow write: if false;
+    }
+
+    // --- SLUG LOOKUP (public read, written by owner or Functions) ---
+    match /slugs/{slug} {
+      allow read: if true;
+      allow write: if false;
+    }
+
+    // --- PAYMENT LOGS (written by Functions) ---
+    match /paymentLogs/{logId} {
+      allow read: if request.auth != null && resource.data.ownerId == request.auth.uid;
+      allow write: if false;
+    }
+  }
+}

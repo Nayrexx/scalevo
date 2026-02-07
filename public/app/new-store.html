@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Nouvelle boutique — Scalevo</title>
+  <link rel="stylesheet" href="/css/main.css">
+  <link rel="stylesheet" href="/css/dashboard.css">
+</head>
+<body>
+  <div class="dashboard-layout">
+    <aside class="sidebar" id="sidebar">
+      <div class="sidebar-logo"><span class="logo-icon">⚡</span> Scalevo</div>
+      <nav class="sidebar-nav">
+        <a href="/app/index.html" class="sidebar-link"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg> Dashboard</a>
+        <a href="/app/stores.html" class="sidebar-link active"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg> Mes boutiques</a>
+        <a href="/app/account.html" class="sidebar-link"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg> Mon compte</a>
+      </nav>
+      <div class="sidebar-footer">
+        <button class="sidebar-link" onclick="Auth.signOut()"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg> Déconnexion</button>
+      </div>
+    </aside>
+
+    <main class="dashboard-main">
+      <header class="topbar">
+        <button class="mobile-sidebar-toggle" id="sidebarToggle"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="18" x2="21" y2="18"/></svg></button>
+        <h1 class="topbar-title">Nouvelle boutique</h1>
+        <div class="topbar-right"></div>
+      </header>
+
+      <div class="dashboard-content">
+        <div class="wizard">
+          <div class="card" style="max-width: 600px;">
+            <div class="card-body">
+              <h2 style="margin-bottom: 1.5rem;">Créer une nouvelle boutique</h2>
+
+              <form id="createStoreForm">
+                <div class="form-group" style="margin-bottom: 1.25rem;">
+                  <label class="form-label">Nom de la boutique</label>
+                  <input type="text" id="storeName" class="input" placeholder="Ma Super Boutique" required>
+                </div>
+
+                <div class="form-group" style="margin-bottom: 1.25rem;">
+                  <label class="form-label">Slug (URL)</label>
+                  <div style="display:flex; align-items:center; gap:0.5rem;">
+                    <input type="text" id="storeSlug" class="input" placeholder="ma-boutique" required style="flex:1;">
+                    <span style="color:var(--text-secondary); font-size:0.875rem; white-space:nowrap;">.scalevo.shop</span>
+                  </div>
+                  <div id="slugStatus" style="font-size:0.8rem; margin-top:0.375rem;"></div>
+                </div>
+
+                <div class="form-group" style="margin-bottom: 1.25rem;">
+                  <label class="form-label">Description (optionnel)</label>
+                  <textarea id="storeDesc" class="input" rows="3" placeholder="Décris ta boutique en quelques mots..."></textarea>
+                </div>
+
+                <div class="form-group" style="margin-bottom: 1.5rem;">
+                  <label class="form-label">Devise</label>
+                  <select id="storeCurrency" class="input">
+                    <option value="EUR">EUR (€)</option>
+                    <option value="USD">USD ($)</option>
+                    <option value="GBP">GBP (£)</option>
+                  </select>
+                </div>
+
+                <button type="submit" class="btn btn-primary btn-lg" id="submitBtn" style="width:100%;" disabled>
+                  Créer la boutique
+                </button>
+              </form>
+            </div>
+          </div>
+        </div>
+      </div>
+    </main>
+  </div>
+  <div class="sidebar-overlay" id="sidebarOverlay"></div>
+
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+  <script src="/js/firebase-config.js"></script>
+  <script src="/js/utils.js"></script>
+  <script src="/js/auth.js"></script>
+  <script src="/js/api.js"></script>
+  <script src="/js/db.js"></script>
+  <script>
+    // Mobile sidebar
+    document.getElementById('sidebarToggle').addEventListener('click', () => {
+      document.getElementById('sidebar').classList.toggle('open');
+      document.getElementById('sidebarOverlay').classList.toggle('visible');
+    });
+    document.getElementById('sidebarOverlay').addEventListener('click', () => {
+      document.getElementById('sidebar').classList.remove('open');
+      document.getElementById('sidebarOverlay').classList.remove('visible');
+    });
+
+    let slugValid = false;
+
+    // Auto-generate slug from name
+    document.getElementById('storeName').addEventListener('input', (e) => {
+      const slug = Utils.slugify(e.target.value);
+      document.getElementById('storeSlug').value = slug;
+      checkSlug(slug);
+    });
+
+    // Manual slug editing
+    document.getElementById('storeSlug').addEventListener('input', (e) => {
+      const slug = Utils.slugify(e.target.value);
+      e.target.value = slug;
+      checkSlug(slug);
+    });
+
+    const checkSlug = Utils.debounce(async (slug) => {
+      const statusEl = document.getElementById('slugStatus');
+      const btn = document.getElementById('submitBtn');
+
+      if (!slug || slug.length < 3) {
+        statusEl.innerHTML = '<span style="color:var(--text-secondary);">Minimum 3 caractères</span>';
+        slugValid = false;
+        btn.disabled = true;
+        return;
+      }
+
+      if (!Utils.isValidSlug(slug)) {
+        statusEl.innerHTML = '<span style="color:#ef4444;">Ce slug est réservé ou invalide</span>';
+        slugValid = false;
+        btn.disabled = true;
+        return;
+      }
+
+      statusEl.innerHTML = '<span style="color:var(--text-secondary);">Vérification...</span>';
+      const available = await DB.isSlugAvailable(slug);
+
+      if (available) {
+        statusEl.innerHTML = '<span style="color:#22c55e;">✓ Disponible</span>';
+        slugValid = true;
+        btn.disabled = false;
+      } else {
+        statusEl.innerHTML = '<span style="color:#ef4444;">✗ Déjà pris</span>';
+        slugValid = false;
+        btn.disabled = true;
+      }
+    }, 400);
+
+    // Submit
+    document.getElementById('createStoreForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      if (!slugValid) return;
+
+      const btn = document.getElementById('submitBtn');
+      btn.disabled = true;
+      btn.textContent = 'Création en cours...';
+
+      try {
+        const result = await API.createStore({
+          name: document.getElementById('storeName').value.trim(),
+          slug: document.getElementById('storeSlug').value.trim(),
+          description: document.getElementById('storeDesc').value.trim(),
+          currency: document.getElementById('storeCurrency').value
+        });
+        Utils.toast('Boutique créée !', 'success');
+        window.location.href = '/app/store.html?id=' + result.storeId;
+      } catch (err) {
+        Utils.toast('Erreur: ' + err.message, 'error');
+        btn.disabled = false;
+        btn.textContent = 'Créer la boutique';
+      }
+    });
+
+    Auth.init((user) => {
+      if (!user) window.location.href = '/login.html';
+    });
+  </script>
+</body>
+</html>

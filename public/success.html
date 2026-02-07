@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Commande confirmée !</title>
+  <link rel="stylesheet" href="/css/main.css">
+  <link rel="stylesheet" href="/css/storefront.css">
+</head>
+<body class="storefront">
+  <div class="sf-success-page">
+    <div class="sf-success-card">
+      <div class="sf-success-icon">✅</div>
+      <h1>Merci pour ta commande !</h1>
+      <p class="sf-success-subtitle">Ta commande a bien été enregistrée. Tu recevras un email de confirmation sous quelques minutes.</p>
+
+      <div class="sf-success-details" id="orderDetails" style="display:none;">
+        <div class="sf-success-row">
+          <span>Numéro de commande</span>
+          <strong id="orderId">—</strong>
+        </div>
+        <div class="sf-success-row">
+          <span>Montant</span>
+          <strong id="orderAmount">—</strong>
+        </div>
+      </div>
+
+      <!-- UPSELL SECTION -->
+      <div id="upsellSection" style="display:none;">
+        <div class="sf-upsell-card">
+          <div class="sf-upsell-badge">⚡ Offre exclusive — Réservée aux acheteurs</div>
+          <h2 id="upsellTitle"></h2>
+          <p id="upsellDesc"></p>
+          <div class="sf-upsell-price" id="upsellPrice"></div>
+          <button class="sf-cta-btn" onclick="acceptUpsell()" id="upsellBtn">Oui, j'en profite !</button>
+          <button class="btn btn-outline" style="width:100%; margin-top:0.75rem;" onclick="declineUpsell()">Non merci</button>
+        </div>
+      </div>
+
+      <div id="finalMessage" style="display:none;">
+        <p style="color:var(--text-secondary); margin-top:1.5rem;">Tu peux fermer cette page. Bonne journée ! 🎉</p>
+      </div>
+    </div>
+  </div>
+
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+  <script src="https://js.stripe.com/v3/"></script>
+  <script src="/js/firebase-config.js"></script>
+  <script src="/js/utils.js"></script>
+  <script src="/js/store-resolver.js"></script>
+  <script>
+    const params = new URLSearchParams(window.location.search);
+    const storeId = params.get('store');
+    const sessionId = params.get('session_id');
+
+    let storeData = null;
+    let funnelData = null;
+
+    async function init() {
+      if (!storeId) return;
+
+      storeData = await StoreResolver.loadStore(storeId);
+      if (storeData?.primaryColor) {
+        document.documentElement.style.setProperty('--sf-primary', storeData.primaryColor);
+      }
+
+      // Load funnel for upsell
+      funnelData = await StoreResolver.loadFunnel(storeId);
+
+      if (funnelData?.upsell?.title) {
+        document.getElementById('upsellSection').style.display = '';
+        document.getElementById('upsellTitle').textContent = funnelData.upsell.title;
+        document.getElementById('upsellDesc').textContent = funnelData.upsell.description || '';
+        document.getElementById('upsellPrice').textContent = Utils.formatPrice(funnelData.upsell.price);
+      } else {
+        document.getElementById('finalMessage').style.display = '';
+      }
+    }
+
+    async function acceptUpsell() {
+      const btn = document.getElementById('upsellBtn');
+      btn.disabled = true;
+      btn.textContent = 'Traitement...';
+
+      try {
+        const res = await fetch('/api/createUpsellCheckoutSession', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            storeId,
+            sessionId,
+            successUrl: window.location.origin + '/success.html?store=' + storeId + '&upsold=1',
+            cancelUrl: window.location.origin + '/success.html?store=' + storeId + '&upsold=0'
+          })
+        });
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.error || 'Erreur');
+        const stripe = getStripeForStore(storeData.stripePublishableKey);
+        await stripe.redirectToCheckout({ sessionId: data.sessionId });
+      } catch(e) {
+        alert('Erreur: ' + e.message);
+        btn.disabled = false;
+        btn.textContent = 'Oui, j\'en profite !';
+      }
+    }
+
+    function declineUpsell() {
+      document.getElementById('upsellSection').style.display = 'none';
+      document.getElementById('finalMessage').style.display = '';
+    }
+
+    // Check if returning from upsell
+    if (params.get('upsold') === '1') {
+      // Already upsold — show final
+      document.getElementById('finalMessage').style.display = '';
+    } else if (params.get('upsold') === '0') {
+      document.getElementById('finalMessage').style.display = '';
+    } else {
+      init();
+    }
+  </script>
+</body>
+</html>

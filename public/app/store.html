@@ -1,0 +1,548 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Boutique — Scalevo</title>
+  <link rel="stylesheet" href="/css/main.css">
+  <link rel="stylesheet" href="/css/dashboard.css">
+</head>
+<body>
+  <div class="dashboard-layout">
+    <aside class="sidebar" id="sidebar">
+      <div class="sidebar-logo"><span class="logo-icon">⚡</span> Scalevo</div>
+      <nav class="sidebar-nav">
+        <a href="/app/index.html" class="sidebar-link"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg> Dashboard</a>
+        <a href="/app/stores.html" class="sidebar-link active"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg> Mes boutiques</a>
+        <a href="/app/account.html" class="sidebar-link"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg> Mon compte</a>
+      </nav>
+      <div class="sidebar-footer">
+        <button class="sidebar-link" onclick="Auth.signOut()"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg> Déconnexion</button>
+      </div>
+    </aside>
+
+    <main class="dashboard-main">
+      <header class="topbar">
+        <button class="mobile-sidebar-toggle" id="sidebarToggle"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="18" x2="21" y2="18"/></svg></button>
+        <h1 class="topbar-title" id="storeName">Boutique</h1>
+        <div class="topbar-right">
+          <a id="previewLink" href="#" target="_blank" class="btn btn-outline btn-sm" style="display:none;">Voir la boutique ↗</a>
+          <button id="publishBtn" class="btn btn-primary btn-sm" style="display:none;" onclick="togglePublish()">Publier</button>
+        </div>
+      </header>
+
+      <div class="dashboard-content">
+        <div class="loading-spinner" id="loader"><div class="spinner"></div></div>
+
+        <!-- TABS -->
+        <div class="tabs" id="tabs" style="display:none;">
+          <button class="tab active" data-tab="products">Produits</button>
+          <button class="tab" data-tab="orders">Commandes</button>
+          <button class="tab" data-tab="funnel">Funnel</button>
+          <button class="tab" data-tab="settings">Paramètres</button>
+        </div>
+
+        <!-- TAB: PRODUCTS ──────────────────── -->
+        <div class="tab-content active" id="tab-products" style="display:none;">
+          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1rem;">
+            <h3>Produits</h3>
+            <button class="btn btn-primary btn-sm" id="addProductBtn" onclick="showProductModal()">+ Ajouter un produit</button>
+          </div>
+          <div id="productsList"></div>
+          <div id="noProducts" class="empty-state" style="display:none;">
+            <p>Aucun produit. Ajoute ton premier produit pour commencer.</p>
+            <button class="btn btn-primary" onclick="showProductModal()">Ajouter un produit</button>
+          </div>
+        </div>
+
+        <!-- TAB: ORDERS ────────────────────── -->
+        <div class="tab-content" id="tab-orders" style="display:none;">
+          <h3 style="margin-bottom:1rem;">Commandes</h3>
+          <div class="stats-grid" id="orderStats" style="margin-bottom:1.5rem;">
+            <div class="stat-card"><div class="stat-label">Total commandes</div><div class="stat-value" id="oTotalOrders">0</div></div>
+            <div class="stat-card"><div class="stat-label">Revenus total</div><div class="stat-value" id="oTotalRevenue">0 €</div></div>
+            <div class="stat-card"><div class="stat-label">Panier moyen</div><div class="stat-value" id="oAvgOrder">0 €</div></div>
+          </div>
+          <div id="ordersTable"></div>
+          <div id="noOrders" class="empty-state" style="display:none;">
+            <p>Aucune commande pour le moment.</p>
+          </div>
+        </div>
+
+        <!-- TAB: FUNNEL ────────────────────── -->
+        <div class="tab-content" id="tab-funnel" style="display:none;">
+          <h3 style="margin-bottom:1rem;">Configuration du funnel</h3>
+          <div class="card" style="max-width:700px;">
+            <div class="card-body">
+              <form id="funnelForm">
+                <h4 style="margin-bottom:1rem;">Bundles (offres groupées)</h4>
+                <div id="bundlesContainer"></div>
+                <button type="button" class="btn btn-outline btn-sm" onclick="addBundle()" style="margin-bottom:2rem;">+ Ajouter un bundle</button>
+
+                <h4 style="margin-bottom:1rem;">Order Bump</h4>
+                <div class="form-group" style="margin-bottom:1rem;">
+                  <label class="form-label">Titre du bump</label>
+                  <input type="text" id="bumpTitle" class="input" placeholder="Ajouter une garantie étendue">
+                </div>
+                <div style="display:grid; grid-template-columns:1fr 1fr; gap:1rem; margin-bottom:2rem;">
+                  <div class="form-group">
+                    <label class="form-label">Prix du bump (€)</label>
+                    <input type="number" id="bumpPrice" class="input" step="0.01" placeholder="9.99">
+                  </div>
+                  <div class="form-group">
+                    <label class="form-label">Description</label>
+                    <input type="text" id="bumpDesc" class="input" placeholder="Garantie 2 ans">
+                  </div>
+                </div>
+
+                <h4 style="margin-bottom:1rem;">Upsell post-achat</h4>
+                <div class="form-group" style="margin-bottom:1rem;">
+                  <label class="form-label">Titre de l'upsell</label>
+                  <input type="text" id="upsellTitle" class="input" placeholder="Offre spéciale !">
+                </div>
+                <div style="display:grid; grid-template-columns:1fr 1fr; gap:1rem; margin-bottom:1rem;">
+                  <div class="form-group">
+                    <label class="form-label">Prix upsell (€)</label>
+                    <input type="number" id="upsellPrice" class="input" step="0.01" placeholder="19.99">
+                  </div>
+                  <div class="form-group">
+                    <label class="form-label">Description</label>
+                    <input type="text" id="upsellDesc" class="input" placeholder="Pack premium...">
+                  </div>
+                </div>
+
+                <h4 style="margin-bottom:1rem;">Countdown</h4>
+                <div class="form-group" style="margin-bottom:1.5rem;">
+                  <label class="form-label">Durée du countdown (minutes)</label>
+                  <input type="number" id="countdownMinutes" class="input" placeholder="15" value="15">
+                </div>
+
+                <button type="submit" class="btn btn-primary">Sauvegarder le funnel</button>
+              </form>
+            </div>
+          </div>
+        </div>
+
+        <!-- TAB: SETTINGS ──────────────────── -->
+        <div class="tab-content" id="tab-settings" style="display:none;">
+          <h3 style="margin-bottom:1rem;">Paramètres de la boutique</h3>
+          <div class="card" style="max-width:600px;">
+            <div class="card-body">
+              <form id="settingsForm">
+                <div class="form-group" style="margin-bottom:1.25rem;">
+                  <label class="form-label">Nom</label>
+                  <input type="text" id="settingName" class="input" required>
+                </div>
+                <div class="form-group" style="margin-bottom:1.25rem;">
+                  <label class="form-label">Description</label>
+                  <textarea id="settingDesc" class="input" rows="3"></textarea>
+                </div>
+                <div class="form-group" style="margin-bottom:1.25rem;">
+                  <label class="form-label">Couleur principale</label>
+                  <input type="color" id="settingColor" value="#6C5CE7" style="width:60px;height:40px;border:none;cursor:pointer;">
+                </div>
+                <div class="form-group" style="margin-bottom:1.25rem;">
+                  <label class="form-label">Clé publique Stripe (pk_live_... ou pk_test_...)</label>
+                  <input type="text" id="settingStripePK" class="input" placeholder="pk_live_xxx ou pk_test_xxx">
+                  <small style="color:var(--text-secondary);">Clé publique de ton compte Stripe — nécessaire pour le checkout.</small>
+                </div>
+                <div class="form-group" style="margin-bottom:1.25rem;">
+                  <label class="form-label">Clé secrète Stripe (sk_live_... ou sk_test_...)</label>
+                  <input type="password" id="settingStripeSK" class="input" placeholder="sk_live_xxx ou sk_test_xxx">
+                  <small style="color:var(--text-secondary);">Clé secrète — stockée de façon sécurisée, jamais exposée au frontend.</small>
+                </div>
+                <button type="submit" class="btn btn-primary">Sauvegarder</button>
+              </form>
+            </div>
+          </div>
+
+          <div class="card" style="max-width:600px; margin-top:2rem; border-color:rgba(239,68,68,0.3);">
+            <div class="card-body">
+              <h4 style="color:#ef4444; margin-bottom:0.5rem;">Zone de danger</h4>
+              <p style="color:var(--text-secondary); margin-bottom:1rem; font-size:0.875rem;">Supprimer cette boutique est irréversible.</p>
+              <button class="btn btn-danger" onclick="deleteStore()">Supprimer la boutique</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </main>
+  </div>
+  <div class="sidebar-overlay" id="sidebarOverlay"></div>
+
+  <!-- PRODUCT MODAL ────────────────────────── -->
+  <div class="modal-overlay" id="productModal">
+    <div class="modal" style="max-width:550px;">
+      <div class="modal-header">
+        <h3 id="productModalTitle">Ajouter un produit</h3>
+        <button class="modal-close" onclick="closeProductModal()">&times;</button>
+      </div>
+      <form id="productForm">
+        <div class="modal-body">
+          <input type="hidden" id="productId">
+          <div class="form-group" style="margin-bottom:1rem;">
+            <label class="form-label">Nom du produit</label>
+            <input type="text" id="prodName" class="input" required placeholder="Nom du produit">
+          </div>
+          <div class="form-group" style="margin-bottom:1rem;">
+            <label class="form-label">Description courte</label>
+            <textarea id="prodDesc" class="input" rows="3" placeholder="Description..."></textarea>
+          </div>
+          <div style="display:grid; grid-template-columns:1fr 1fr; gap:1rem; margin-bottom:1rem;">
+            <div class="form-group">
+              <label class="form-label">Prix (€)</label>
+              <input type="number" id="prodPrice" class="input" step="0.01" required placeholder="29.99">
+            </div>
+            <div class="form-group">
+              <label class="form-label">Prix barré (€)</label>
+              <input type="number" id="prodComparePrice" class="input" step="0.01" placeholder="59.99">
+            </div>
+          </div>
+          <div class="form-group" style="margin-bottom:1rem;">
+            <label class="form-label">Images (URLs, une par ligne)</label>
+            <textarea id="prodImages" class="input" rows="3" placeholder="https://example.com/image1.jpg&#10;https://example.com/image2.jpg"></textarea>
+          </div>
+          <div class="form-group" style="margin-bottom:1rem;">
+            <label class="form-label">Caractéristiques (une par ligne)</label>
+            <textarea id="prodFeatures" class="input" rows="3" placeholder="✓ Livraison gratuite&#10;✓ Garantie 30 jours"></textarea>
+          </div>
+          <div class="form-group">
+            <label style="display:flex; align-items:center; gap:0.5rem; cursor:pointer;">
+              <input type="checkbox" id="prodPublished"> Publié (visible sur la boutique)
+            </label>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-outline" onclick="closeProductModal()">Annuler</button>
+          <button type="submit" class="btn btn-primary" id="productSubmitBtn">Sauvegarder</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+  <script src="/js/firebase-config.js"></script>
+  <script src="/js/utils.js"></script>
+  <script src="/js/auth.js"></script>
+  <script src="/js/api.js"></script>
+  <script src="/js/db.js"></script>
+  <script>
+    const storeId = Utils.getParam('id');
+    if (!storeId) window.location.href = '/app/stores.html';
+
+    let currentStore = null;
+    let currentProducts = [];
+    let currentFunnel = null;
+
+    // ─── Sidebar / Tabs ───
+    document.getElementById('sidebarToggle').addEventListener('click', () => {
+      document.getElementById('sidebar').classList.toggle('open');
+      document.getElementById('sidebarOverlay').classList.toggle('visible');
+    });
+    document.getElementById('sidebarOverlay').addEventListener('click', () => {
+      document.getElementById('sidebar').classList.remove('open');
+      document.getElementById('sidebarOverlay').classList.remove('visible');
+    });
+
+    document.querySelectorAll('.tab').forEach(tab => {
+      tab.addEventListener('click', () => {
+        document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+        document.querySelectorAll('.tab-content').forEach(c => { c.classList.remove('active'); c.style.display = 'none'; });
+        tab.classList.add('active');
+        const target = document.getElementById('tab-' + tab.dataset.tab);
+        target.classList.add('active');
+        target.style.display = '';
+      });
+    });
+
+    // ─── Products ───
+    function renderProducts() {
+      if (currentProducts.length === 0) {
+        document.getElementById('noProducts').style.display = '';
+        document.getElementById('productsList').innerHTML = '';
+        return;
+      }
+      document.getElementById('noProducts').style.display = 'none';
+      document.getElementById('productsList').innerHTML = currentProducts.map(p => `
+        <div class="product-row">
+          <div class="product-row-img">
+            ${p.images && p.images[0] ? `<img src="${Utils.escapeHtml(p.images[0])}" alt="">` : '<div style="width:60px;height:60px;background:var(--bg-tertiary);border-radius:var(--radius-sm);"></div>'}
+          </div>
+          <div class="product-row-info">
+            <strong>${Utils.escapeHtml(p.name)}</strong>
+            <span>${Utils.formatPrice(p.price)}${p.comparePrice ? ' <s style="color:var(--text-secondary);">' + Utils.formatPrice(p.comparePrice) + '</s>' : ''}</span>
+          </div>
+          <div class="product-row-status">
+            <span class="badge ${p.published ? 'badge-success' : 'badge-outline'}">${p.published ? 'Publié' : 'Brouillon'}</span>
+          </div>
+          <div class="product-row-actions">
+            <button class="btn btn-outline btn-sm" onclick="editProduct('${p.id}')">Modifier</button>
+            <button class="btn btn-danger btn-sm" onclick="removeProduct('${p.id}')">Supprimer</button>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    function showProductModal(product) {
+      const modal = document.getElementById('productModal');
+      document.getElementById('productModalTitle').textContent = product ? 'Modifier le produit' : 'Ajouter un produit';
+      document.getElementById('productId').value = product?.id || '';
+      document.getElementById('prodName').value = product?.name || '';
+      document.getElementById('prodDesc').value = product?.description || '';
+      document.getElementById('prodPrice').value = product?.price || '';
+      document.getElementById('prodComparePrice').value = product?.comparePrice || '';
+      document.getElementById('prodImages').value = (product?.images || []).join('\n');
+      document.getElementById('prodFeatures').value = (product?.features || []).join('\n');
+      document.getElementById('prodPublished').checked = product?.published || false;
+      modal.classList.add('active');
+    }
+
+    function closeProductModal() {
+      document.getElementById('productModal').classList.remove('active');
+    }
+
+    function editProduct(id) {
+      const p = currentProducts.find(x => x.id === id);
+      if (p) showProductModal(p);
+    }
+
+    async function removeProduct(id) {
+      if (!confirm('Supprimer ce produit ?')) return;
+      try {
+        await DB.deleteProduct(storeId, id);
+        currentProducts = currentProducts.filter(p => p.id !== id);
+        renderProducts();
+        Utils.toast('Produit supprimé', 'success');
+      } catch(e) { Utils.toast('Erreur: ' + e.message, 'error'); }
+    }
+
+    document.getElementById('productForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const btn = document.getElementById('productSubmitBtn');
+      btn.disabled = true;
+      btn.textContent = 'Sauvegarde...';
+
+      const data = {
+        name: document.getElementById('prodName').value.trim(),
+        description: document.getElementById('prodDesc').value.trim(),
+        price: parseFloat(document.getElementById('prodPrice').value) || 0,
+        comparePrice: parseFloat(document.getElementById('prodComparePrice').value) || 0,
+        images: document.getElementById('prodImages').value.split('\n').map(s => s.trim()).filter(Boolean),
+        features: document.getElementById('prodFeatures').value.split('\n').map(s => s.trim()).filter(Boolean),
+        published: document.getElementById('prodPublished').checked
+      };
+
+      const productId = document.getElementById('productId').value;
+      try {
+        if (productId) {
+          await DB.updateProduct(storeId, productId, data);
+          const idx = currentProducts.findIndex(p => p.id === productId);
+          if (idx >= 0) currentProducts[idx] = { ...currentProducts[idx], ...data };
+        } else {
+          const newId = await DB.createProduct(storeId, data);
+          currentProducts.unshift({ id: newId, ...data });
+        }
+        renderProducts();
+        closeProductModal();
+        Utils.toast('Produit sauvegardé', 'success');
+      } catch(e) { Utils.toast('Erreur: ' + e.message, 'error'); }
+      btn.disabled = false;
+      btn.textContent = 'Sauvegarder';
+    });
+
+    // ─── Orders ───
+    async function loadOrders() {
+      const orders = await DB.getOrders(storeId);
+      const stats = await DB.getOrderStats(storeId);
+      document.getElementById('oTotalOrders').textContent = stats.totalOrders;
+      document.getElementById('oTotalRevenue').textContent = Utils.formatPrice(stats.totalRevenue);
+      document.getElementById('oAvgOrder').textContent = Utils.formatPrice(stats.averageOrder);
+
+      if (orders.length === 0) {
+        document.getElementById('noOrders').style.display = '';
+        return;
+      }
+      document.getElementById('ordersTable').innerHTML = `
+        <table class="table">
+          <thead><tr><th>Date</th><th>Client</th><th>Montant</th><th>Statut</th></tr></thead>
+          <tbody>
+            ${orders.map(o => `
+              <tr>
+                <td>${o.createdAt?.toDate ? o.createdAt.toDate().toLocaleDateString('fr-FR') : '—'}</td>
+                <td>${Utils.escapeHtml(o.customerEmail || '—')}</td>
+                <td>${Utils.formatPrice(o.amount || 0)}</td>
+                <td><span class="badge ${o.status === 'paid' ? 'badge-success' : o.status === 'refunded' ? 'badge-danger' : 'badge-outline'}">${o.status || 'pending'}</span></td>
+              </tr>
+            `).join('')}
+          </tbody>
+        </table>
+      `;
+    }
+
+    // ─── Funnel ───
+    let bundleCount = 0;
+    function addBundle(data) {
+      bundleCount++;
+      const i = bundleCount;
+      const container = document.getElementById('bundlesContainer');
+      const div = document.createElement('div');
+      div.className = 'card';
+      div.style.marginBottom = '1rem';
+      div.innerHTML = `
+        <div class="card-body" style="padding:1rem;">
+          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:0.75rem;">
+            <strong>Bundle ${i}</strong>
+            <button type="button" class="btn btn-danger btn-sm" onclick="this.closest('.card').remove()">×</button>
+          </div>
+          <div style="display:grid; grid-template-columns:1fr 1fr; gap:0.75rem;">
+            <div class="form-group">
+              <label class="form-label">Label</label>
+              <input type="text" class="input bundle-label" value="${data?.label || ''}" placeholder="Pack x3">
+            </div>
+            <div class="form-group">
+              <label class="form-label">Quantité</label>
+              <input type="number" class="input bundle-qty" value="${data?.qty || 1}" min="1">
+            </div>
+            <div class="form-group">
+              <label class="form-label">Prix unitaire (€)</label>
+              <input type="number" class="input bundle-price" step="0.01" value="${data?.unitPrice || ''}" placeholder="24.99">
+            </div>
+            <div class="form-group">
+              <label class="form-label">Badge</label>
+              <input type="text" class="input bundle-badge" value="${data?.badge || ''}" placeholder="Meilleure vente">
+            </div>
+          </div>
+        </div>
+      `;
+      container.appendChild(div);
+    }
+
+    function collectBundles() {
+      const bundles = [];
+      document.querySelectorAll('#bundlesContainer .card').forEach(card => {
+        bundles.push({
+          label: card.querySelector('.bundle-label').value.trim(),
+          qty: parseInt(card.querySelector('.bundle-qty').value) || 1,
+          unitPrice: parseFloat(card.querySelector('.bundle-price').value) || 0,
+          badge: card.querySelector('.bundle-badge').value.trim()
+        });
+      });
+      return bundles;
+    }
+
+    document.getElementById('funnelForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const data = {
+        bundles: collectBundles(),
+        orderBump: {
+          title: document.getElementById('bumpTitle').value.trim(),
+          price: parseFloat(document.getElementById('bumpPrice').value) || 0,
+          description: document.getElementById('bumpDesc').value.trim()
+        },
+        upsell: {
+          title: document.getElementById('upsellTitle').value.trim(),
+          price: parseFloat(document.getElementById('upsellPrice').value) || 0,
+          description: document.getElementById('upsellDesc').value.trim()
+        },
+        countdownMinutes: parseInt(document.getElementById('countdownMinutes').value) || 15
+      };
+
+      try {
+        const id = await DB.saveFunnel(storeId, currentFunnel?.id, data);
+        currentFunnel = { id, ...data };
+        Utils.toast('Funnel sauvegardé', 'success');
+      } catch(e) { Utils.toast('Erreur: ' + e.message, 'error'); }
+    });
+
+    function populateFunnel(funnel) {
+      if (!funnel) return;
+      (funnel.bundles || []).forEach(b => addBundle(b));
+      document.getElementById('bumpTitle').value = funnel.orderBump?.title || '';
+      document.getElementById('bumpPrice').value = funnel.orderBump?.price || '';
+      document.getElementById('bumpDesc').value = funnel.orderBump?.description || '';
+      document.getElementById('upsellTitle').value = funnel.upsell?.title || '';
+      document.getElementById('upsellPrice').value = funnel.upsell?.price || '';
+      document.getElementById('upsellDesc').value = funnel.upsell?.description || '';
+      document.getElementById('countdownMinutes').value = funnel.countdownMinutes || 15;
+    }
+
+    // ─── Settings ───
+    document.getElementById('settingsForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      try {
+        await API.updateStore(storeId, {
+          name: document.getElementById('settingName').value.trim(),
+          description: document.getElementById('settingDesc').value.trim(),
+          primaryColor: document.getElementById('settingColor').value,
+          stripePublishableKey: document.getElementById('settingStripePK').value.trim(),
+          stripeSecretKey: document.getElementById('settingStripeSK').value.trim()
+        });
+        document.getElementById('storeName').textContent = document.getElementById('settingName').value.trim();
+        Utils.toast('Paramètres sauvegardés', 'success');
+      } catch(e) { Utils.toast('Erreur: ' + e.message, 'error'); }
+    });
+
+    async function deleteStore() {
+      if (!confirm('Supprimer cette boutique et tous ses produits ? Cette action est irréversible.')) return;
+      try {
+        await API.deleteStore(storeId);
+        Utils.toast('Boutique supprimée', 'success');
+        window.location.href = '/app/stores.html';
+      } catch(e) { Utils.toast('Erreur: ' + e.message, 'error'); }
+    }
+
+    async function togglePublish() {
+      const newState = !currentStore.published;
+      try {
+        await DB.updateStoreLocal(storeId, { published: newState });
+        currentStore.published = newState;
+        document.getElementById('publishBtn').textContent = newState ? 'Dépublier' : 'Publier';
+        document.getElementById('publishBtn').className = newState ? 'btn btn-outline btn-sm' : 'btn btn-primary btn-sm';
+        Utils.toast(newState ? 'Boutique publiée !' : 'Boutique dépubliée', 'success');
+      } catch(e) { Utils.toast('Erreur: ' + e.message, 'error'); }
+    }
+
+    // ─── INIT ───
+    Auth.init(async (user) => {
+      if (!user) { window.location.href = '/login.html'; return; }
+
+      currentStore = await DB.getStore(storeId);
+      if (!currentStore || currentStore.ownerId !== user.uid) {
+        Utils.toast('Boutique introuvable', 'error');
+        window.location.href = '/app/stores.html';
+        return;
+      }
+
+      // Header
+      document.getElementById('storeName').textContent = currentStore.name;
+      document.getElementById('previewLink').href = 'https://' + currentStore.slug + '.' + ROOT_DOMAIN;
+      document.getElementById('previewLink').style.display = '';
+      document.getElementById('publishBtn').style.display = '';
+      document.getElementById('publishBtn').textContent = currentStore.published ? 'Dépublier' : 'Publier';
+      document.getElementById('publishBtn').className = currentStore.published ? 'btn btn-outline btn-sm' : 'btn btn-primary btn-sm';
+
+      // Load data
+      currentProducts = await DB.getProducts(storeId);
+      currentFunnel = await DB.getFunnel(storeId);
+
+      // Populate
+      renderProducts();
+      populateFunnel(currentFunnel);
+      loadOrders();
+
+      // Settings
+      document.getElementById('settingName').value = currentStore.name || '';
+      document.getElementById('settingDesc').value = currentStore.description || '';
+      document.getElementById('settingColor').value = currentStore.primaryColor || '#6C5CE7';
+      document.getElementById('settingStripePK').value = currentStore.stripePublishableKey || '';
+      document.getElementById('settingStripeSK').value = currentStore.stripeSecretKey ? '••••••••' : '';
+
+      // Show UI
+      document.getElementById('loader').style.display = 'none';
+      document.getElementById('tabs').style.display = '';
+      document.getElementById('tab-products').style.display = '';
+    });
+  </script>
+</body>
+</html>

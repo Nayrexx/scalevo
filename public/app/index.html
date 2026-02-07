@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dashboard — Scalevo</title>
+  <link rel="stylesheet" href="/css/main.css">
+  <link rel="stylesheet" href="/css/dashboard.css">
+</head>
+<body>
+  <div class="dashboard-layout">
+    <!-- SIDEBAR ────────────────────────────── -->
+    <aside class="sidebar" id="sidebar">
+      <div class="sidebar-logo">
+        <span class="logo-icon">⚡</span> Scalevo
+      </div>
+      <nav class="sidebar-nav">
+        <a href="/app/index.html" class="sidebar-link active" data-page="dashboard">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
+          Dashboard
+        </a>
+        <a href="/app/stores.html" class="sidebar-link" data-page="stores">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+          Mes boutiques
+        </a>
+        <a href="/app/account.html" class="sidebar-link" data-page="account">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+          Mon compte
+        </a>
+      </nav>
+      <div class="sidebar-footer">
+        <div class="sidebar-plan" id="sidebarPlan">
+          <span class="badge badge-outline">Free</span>
+        </div>
+        <button class="sidebar-link" onclick="Auth.signOut()">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+          Déconnexion
+        </button>
+      </div>
+    </aside>
+
+    <!-- MAIN CONTENT ──────────────────────── -->
+    <main class="dashboard-main">
+      <!-- Topbar -->
+      <header class="topbar">
+        <button class="mobile-sidebar-toggle" id="sidebarToggle">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+        </button>
+        <h1 class="topbar-title">Dashboard</h1>
+        <div class="topbar-right">
+          <span class="topbar-user" id="topbarUser">...</span>
+        </div>
+      </header>
+
+      <div class="dashboard-content" id="content">
+        <div class="loading-spinner" id="loader">
+          <div class="spinner"></div>
+        </div>
+
+        <!-- Stats Grid (hidden until loaded) -->
+        <div class="stats-grid" id="statsGrid" style="display:none;">
+          <div class="stat-card">
+            <div class="stat-label">Boutiques</div>
+            <div class="stat-value" id="statStores">0</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-label">Commandes aujourd'hui</div>
+            <div class="stat-value" id="statTodayOrders">0</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-label">Revenus aujourd'hui</div>
+            <div class="stat-value" id="statTodayRevenue">0 €</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-label">Revenus total</div>
+            <div class="stat-value" id="statTotalRevenue">0 €</div>
+          </div>
+        </div>
+
+        <!-- Stores list preview -->
+        <div id="storesSection" style="display:none;">
+          <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:1rem;">
+            <h2 style="margin:0;">Mes boutiques</h2>
+            <a href="/app/new-store.html" class="btn btn-primary btn-sm">+ Nouvelle boutique</a>
+          </div>
+          <div id="storesList" class="stores-grid"></div>
+          <div id="noStores" class="empty-state" style="display:none;">
+            <p>Tu n'as pas encore de boutique.</p>
+            <a href="/app/new-store.html" class="btn btn-primary">Créer ma première boutique</a>
+          </div>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <!-- Sidebar mobile overlay -->
+  <div class="sidebar-overlay" id="sidebarOverlay"></div>
+
+  <!-- Firebase SDK -->
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+  <script src="/js/firebase-config.js"></script>
+  <script src="/js/utils.js"></script>
+  <script src="/js/auth.js"></script>
+  <script src="/js/api.js"></script>
+  <script src="/js/db.js"></script>
+  <script>
+    // Mobile sidebar toggle
+    document.getElementById('sidebarToggle').addEventListener('click', () => {
+      document.getElementById('sidebar').classList.toggle('open');
+      document.getElementById('sidebarOverlay').classList.toggle('visible');
+    });
+    document.getElementById('sidebarOverlay').addEventListener('click', () => {
+      document.getElementById('sidebar').classList.remove('open');
+      document.getElementById('sidebarOverlay').classList.remove('visible');
+    });
+
+    // Init
+    Auth.init(async (user) => {
+      if (!user) { window.location.href = '/login.html'; return; }
+
+      document.getElementById('topbarUser').textContent = user.displayName || user.email;
+
+      // Load subscription
+      const sub = await Auth.loadSubscription();
+      const planName = sub?.plan || 'free';
+      document.getElementById('sidebarPlan').innerHTML =
+        `<span class="badge ${planName === 'pro' ? 'badge-primary' : planName === 'scale' ? 'badge-success' : 'badge-outline'}">${planName.charAt(0).toUpperCase() + planName.slice(1)}</span>`;
+
+      // Load stores
+      const stores = await DB.getStores(user.uid);
+      document.getElementById('loader').style.display = 'none';
+      document.getElementById('statsGrid').style.display = '';
+      document.getElementById('storesSection').style.display = '';
+
+      document.getElementById('statStores').textContent = stores.length;
+
+      // Aggregate stats from all stores
+      let todayOrders = 0, todayRevenue = 0, totalRevenue = 0;
+      for (const store of stores) {
+        try {
+          const stats = await DB.getOrderStats(store.id);
+          todayOrders += stats.todayOrders;
+          todayRevenue += stats.todayRevenue;
+          totalRevenue += stats.totalRevenue;
+        } catch(e) {}
+      }
+      document.getElementById('statTodayOrders').textContent = todayOrders;
+      document.getElementById('statTodayRevenue').textContent = Utils.formatPrice(todayRevenue);
+      document.getElementById('statTotalRevenue').textContent = Utils.formatPrice(totalRevenue);
+
+      // Render stores
+      if (stores.length === 0) {
+        document.getElementById('noStores').style.display = '';
+      } else {
+        document.getElementById('storesList').innerHTML = stores.map(store => `
+          <a href="/app/store.html?id=${store.id}" class="store-card">
+            <div class="store-card-header">
+              <h3>${Utils.escapeHtml(store.name)}</h3>
+              <span class="badge ${store.published ? 'badge-success' : 'badge-outline'}">${store.published ? 'En ligne' : 'Brouillon'}</span>
+            </div>
+            <p class="store-card-slug">${store.slug}.${ROOT_DOMAIN}</p>
+            <div class="store-card-footer">
+              <span>${store.productCount || 0} produit(s)</span>
+            </div>
+          </a>
+        `).join('');
+      }
+    });
+  </script>
+</body>
+</html>
