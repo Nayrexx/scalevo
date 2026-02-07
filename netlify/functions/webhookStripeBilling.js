@@ -26,8 +26,22 @@ exports.handler = async (event) => {
   switch (evt.type) {
     case 'checkout.session.completed': {
       const session = evt.data.object;
-      if (session.mode === 'subscription' && session.metadata?.firebaseUID) {
-        const uid = session.metadata.firebaseUID;
+      const uid = session.metadata?.firebaseUID;
+      if (!uid) break;
+
+      // ─── Addon purchase ───
+      if (session.metadata?.type === 'addon' && session.metadata?.addonId) {
+        const addonId = session.metadata.addonId;
+        await db.collection('addons').doc(uid).set({
+          [addonId]: true,
+          [`${addonId}_activatedAt`]: ts,
+          [`${addonId}_stripeSubscriptionId`]: session.subscription || session.payment_intent || null,
+        }, { merge: true });
+        break;
+      }
+
+      // ─── Plan subscription ───
+      if (session.mode === 'subscription') {
         const plan = session.metadata.plan || 'starter';
         await db.collection('subscriptions').doc(uid).set({
           plan,

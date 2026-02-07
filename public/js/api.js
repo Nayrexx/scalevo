@@ -54,4 +54,9 @@ const API = {
   async createUpsellCheckout(params) {
     return this._call('createUpsellCheckoutSession', params, false);
   },
+
+  // ── Addon purchase ──
+  async createAddonCheckout(addonId) {
+    return this._call('createAddonCheckoutSession', { addonId });
+  },
 };

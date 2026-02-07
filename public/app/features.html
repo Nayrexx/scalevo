@@ -1,0 +1,269 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Modules — Scalevo</title>
+  <link rel="stylesheet" href="/css/main.css">
+  <link rel="stylesheet" href="/css/dashboard.css">
+</head>
+<body>
+  <div class="dashboard-layout">
+    <aside class="sidebar" id="sidebar">
+      <div class="sidebar-logo"><span class="logo-icon">⚡</span> Scalevo</div>
+      <nav class="sidebar-nav">
+        <a href="/app/index.html" class="sidebar-link"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg> Dashboard</a>
+        <a href="/app/stores.html" class="sidebar-link"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg> Mes boutiques</a>
+        <a href="/app/features.html" class="sidebar-link active"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg> Modules</a>
+        <a href="/app/account.html" class="sidebar-link"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg> Mon compte</a>
+      </nav>
+      <div class="sidebar-footer">
+        <div class="sidebar-plan" id="sidebarPlan"><span class="badge badge-outline">Free</span></div>
+        <button class="sidebar-link" onclick="Auth.signOut()"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg> Déconnexion</button>
+      </div>
+    </aside>
+
+    <main class="dashboard-main">
+      <header class="topbar">
+        <button class="mobile-sidebar-toggle" id="sidebarToggle"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="18" x2="21" y2="18"/></svg></button>
+        <h1 class="topbar-title">Modules</h1>
+        <div class="topbar-right"></div>
+      </header>
+
+      <div class="dashboard-content">
+        <div class="loading-spinner" id="loader"><div class="spinner"></div></div>
+
+        <div id="marketplaceContent" style="display:none;">
+          <!-- HERO BANNER -->
+          <div class="mp-hero">
+            <div class="mp-hero-text">
+              <h2>Marketplace de modules</h2>
+              <p>Ajoute des fonctionnalités puissantes à tes boutiques. Certains modules sont inclus dans ton plan.</p>
+            </div>
+            <div class="mp-hero-plan" id="heroPlan">
+              <span class="mp-hero-plan-label">Ton plan</span>
+              <span class="mp-hero-plan-name badge badge-outline" id="heroPlanBadge">Aucun</span>
+            </div>
+          </div>
+
+          <!-- CATEGORY FILTER -->
+          <div class="mp-filters">
+            <button class="mp-filter-btn active" data-cat="all">🔥 Tous</button>
+            <button class="mp-filter-btn" data-cat="marketing">📣 Marketing</button>
+            <button class="mp-filter-btn" data-cat="vente">💰 Vente</button>
+            <button class="mp-filter-btn" data-cat="analytics">📊 Analytics</button>
+            <button class="mp-filter-btn" data-cat="design">🎨 Design</button>
+            <button class="mp-filter-btn" data-cat="gestion">⚙️ Gestion</button>
+          </div>
+
+          <!-- MODULES GRID -->
+          <div class="mp-grid" id="modulesGrid"></div>
+
+          <!-- COMING SOON SECTION -->
+          <div class="mp-soon-section" id="soonSection">
+            <h3 class="mp-soon-title">🚀 Bientôt disponible</h3>
+            <div class="mp-soon-grid" id="soonGrid"></div>
+          </div>
+        </div>
+
+        <!-- CHECKOUT OVERLAY (embedded Stripe) -->
+        <div class="pricing-overlay" id="addonCheckoutOverlay">
+          <div class="pricing-modal" style="max-width:560px;">
+            <button class="pricing-close" onclick="closeAddonCheckout()">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+            </button>
+            <div class="pricing-header" id="addonCheckoutHeader">
+              <h2 class="pricing-title" id="addonCheckoutTitle">Ajouter un module</h2>
+              <p class="pricing-subtitle" id="addonCheckoutSub">Paiement sécurisé par Stripe</p>
+            </div>
+            <div id="addon-checkout-embed"></div>
+          </div>
+        </div>
+      </div>
+    </main>
+  </div>
+  <div class="sidebar-overlay" id="sidebarOverlay"></div>
+
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+  <script src="https://js.stripe.com/v3/"></script>
+  <script src="/js/firebase-config.js"></script>
+  <script src="/js/utils.js"></script>
+  <script src="/js/auth.js"></script>
+  <script src="/js/api.js"></script>
+  <script src="/js/db.js"></script>
+  <script>
+    // ─── Sidebar toggle ───
+    document.getElementById('sidebarToggle').addEventListener('click', () => {
+      document.getElementById('sidebar').classList.toggle('open');
+      document.getElementById('sidebarOverlay').classList.toggle('visible');
+    });
+    document.getElementById('sidebarOverlay').addEventListener('click', () => {
+      document.getElementById('sidebar').classList.remove('open');
+      document.getElementById('sidebarOverlay').classList.remove('visible');
+    });
+
+    // ─── ADDONS CONFIG ───
+    const ADDONS = [
+      { id: 'promoCodes',    name: 'Codes Promo',          icon: '🎫', desc: 'Crée des codes de réduction et des offres flash pour booster tes ventes.',                    price: 499,  priceLabel: '4,99€/mois',   category: 'marketing',  includedIn: ['scale'],         popular: false },
+      { id: 'emailsAuto',    name: 'Emails Automatiques',  icon: '📧', desc: 'Confirmation de commande, notification d\'expédition, relance panier abandonné.',              price: 799,  priceLabel: '7,99€/mois',   category: 'marketing',  includedIn: ['scale'],         popular: true  },
+      { id: 'analyticsPro',  name: 'Analytics Pro',        icon: '📊', desc: 'Graphiques de ventes, taux de conversion, sources de trafic et tendances.',                    price: 599,  priceLabel: '5,99€/mois',   category: 'analytics',  includedIn: ['pro', 'scale'],  popular: false },
+      { id: 'customDomain',  name: 'Domaine Personnalisé', icon: '🌐', desc: 'Connecte ton propre nom de domaine (ex: maboutique.com) à ta boutique.',                      price: 299,  priceLabel: '2,99€/mois',   category: 'design',     includedIn: [],                popular: false },
+      { id: 'reviews',       name: 'Avis Clients',         icon: '⭐', desc: 'Collecte et affiche les avis clients avec photos. Social proof automatique.',                   price: 399,  priceLabel: '3,99€/mois',   category: 'vente',      includedIn: ['pro', 'scale'],  popular: true  },
+      { id: 'pixelTracking', name: 'Pixels & Tracking',    icon: '📱', desc: 'Facebook Pixel, TikTok Pixel, Google Analytics & Google Tag Manager intégrés.',                price: 499,  priceLabel: '4,99€/mois',   category: 'marketing',  includedIn: ['pro', 'scale'],  popular: false },
+      { id: 'cartRecovery',  name: 'Relance Panier',       icon: '🔄', desc: 'Récupère automatiquement les paniers abandonnés par séquences d\'emails intelligentes.',        price: 999,  priceLabel: '9,99€/mois',   category: 'marketing',  includedIn: ['scale'],         popular: true  },
+      { id: 'premiumThemes', name: 'Thèmes Premium',       icon: '🎨', desc: '12 templates de boutique professionnels et optimisés pour la conversion.',                      price: 1499, priceLabel: '14,99€ unique', category: 'design',    includedIn: [],                popular: false, oneTime: true },
+      { id: 'liveChat',      name: 'Chat en Direct',       icon: '💬', desc: 'Widget de chat intégré à ta boutique. Réponds à tes clients en temps réel.',                    price: 699,  priceLabel: '6,99€/mois',   category: 'vente',      includedIn: [],                popular: false },
+      { id: 'seoAdvanced',   name: 'SEO Avancé',           icon: '🏷️', desc: 'Meta tags automatiques, sitemap XML, Open Graph et Schema.org pour Google.',                   price: 399,  priceLabel: '3,99€/mois',   category: 'marketing',  includedIn: ['pro', 'scale'],  popular: false },
+      { id: 'multiUsers',    name: 'Multi-Utilisateurs',   icon: '👥', desc: 'Invite des collaborateurs avec des rôles (admin, éditeur, support).',                           price: 499,  priceLabel: '4,99€/mois',   category: 'gestion',    includedIn: ['scale'],         popular: false },
+      { id: 'orderTracking', name: 'Suivi Commandes',      icon: '🚚', desc: 'Page de suivi de commande pour tes clients avec numéro de tracking.',                           price: 399,  priceLabel: '3,99€/mois',   category: 'vente',      includedIn: ['pro', 'scale'],  popular: false },
+    ];
+
+    const COMING_SOON = [
+      { id: 'abTesting',       name: 'A/B Testing',          icon: '🧪', desc: 'Teste différentes versions de tes pages et optimise les conversions.',       category: 'analytics' },
+      { id: 'dropshipAuto',    name: 'Dropshipping Auto',    icon: '📦', desc: 'Import automatique de produits AliExpress/CJ et fulfillment automatisé.',    category: 'gestion'   },
+      { id: 'mobileApp',       name: 'App Mobile',           icon: '📲', desc: 'Transforme ta boutique en application mobile iOS & Android.',                 category: 'design'    },
+    ];
+
+    const CAT_LABELS = { marketing: 'Marketing', vente: 'Vente', analytics: 'Analytics', design: 'Design', gestion: 'Gestion' };
+
+    let currentPlan = null;
+    let purchasedAddons = {};
+    let embeddedCheckout = null;
+
+    // ─── FILTER ───
+    document.querySelectorAll('.mp-filter-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        document.querySelectorAll('.mp-filter-btn').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        filterModules(btn.dataset.cat);
+      });
+    });
+
+    function filterModules(cat) {
+      document.querySelectorAll('.mp-card').forEach(card => {
+        card.style.display = (cat === 'all' || card.dataset.cat === cat) ? '' : 'none';
+      });
+      // Show/hide coming soon
+      const soonCards = document.querySelectorAll('.mp-soon-card');
+      let anyVisible = false;
+      soonCards.forEach(card => {
+        const show = (cat === 'all' || card.dataset.cat === cat);
+        card.style.display = show ? '' : 'none';
+        if (show) anyVisible = true;
+      });
+      document.getElementById('soonSection').style.display = anyVisible ? '' : 'none';
+    }
+
+    // ─── RENDER ───
+    function getAddonStatus(addon) {
+      if (addon.includedIn.includes(currentPlan)) return 'included';
+      if (purchasedAddons[addon.id]) return 'purchased';
+      return 'available';
+    }
+
+    function renderModules() {
+      const grid = document.getElementById('modulesGrid');
+      grid.innerHTML = ADDONS.map(addon => {
+        const status = getAddonStatus(addon);
+        let statusHtml = '';
+        let actionHtml = '';
+
+        if (status === 'included') {
+          statusHtml = '<span class="mp-status mp-status--included">✓ Inclus dans ton plan</span>';
+          actionHtml = '<button class="btn btn-outline btn-sm" disabled>Déjà inclus</button>';
+        } else if (status === 'purchased') {
+          statusHtml = '<span class="mp-status mp-status--active">✓ Actif</span>';
+          actionHtml = '<button class="btn btn-outline btn-sm" disabled>Activé</button>';
+        } else {
+          statusHtml = `<span class="mp-status mp-status--price">${addon.priceLabel}</span>`;
+          actionHtml = `<button class="btn btn-primary btn-sm" onclick="purchaseAddon('${addon.id}')">Ajouter</button>`;
+        }
+
+        return `
+          <div class="mp-card ${status === 'included' || status === 'purchased' ? 'mp-card--active' : ''} ${addon.popular ? 'mp-card--popular' : ''}" data-cat="${addon.category}" data-id="${addon.id}">
+            ${addon.popular ? '<div class="mp-popular-tag">Populaire</div>' : ''}
+            <div class="mp-card-header">
+              <div class="mp-card-icon">${addon.icon}</div>
+              <span class="mp-card-cat">${CAT_LABELS[addon.category]}</span>
+            </div>
+            <h3 class="mp-card-title">${addon.name}</h3>
+            <p class="mp-card-desc">${addon.desc}</p>
+            <div class="mp-card-footer">
+              ${statusHtml}
+              ${actionHtml}
+            </div>
+          </div>`;
+      }).join('');
+
+      // Coming soon
+      const soonGrid = document.getElementById('soonGrid');
+      soonGrid.innerHTML = COMING_SOON.map(addon => `
+        <div class="mp-soon-card" data-cat="${addon.category}">
+          <div class="mp-card-icon">${addon.icon}</div>
+          <div>
+            <h4 class="mp-card-title" style="margin-bottom:0.25rem;">${addon.name}</h4>
+            <p class="mp-card-desc" style="margin:0;">${addon.desc}</p>
+          </div>
+          <span class="mp-soon-badge">Bientôt</span>
+        </div>
+      `).join('');
+    }
+
+    // ─── PURCHASE ───
+    async function purchaseAddon(addonId) {
+      const addon = ADDONS.find(a => a.id === addonId);
+      if (!addon) return;
+
+      document.getElementById('addonCheckoutTitle').textContent = addon.icon + ' ' + addon.name;
+      document.getElementById('addonCheckoutSub').textContent = addon.priceLabel + ' — Paiement sécurisé par Stripe';
+      document.getElementById('addonCheckoutOverlay').style.display = 'flex';
+      document.getElementById('addon-checkout-embed').innerHTML = '<div class="loading-spinner" style="padding:2rem 0;"><div class="spinner"></div></div>';
+
+      try {
+        const { clientSecret } = await API.createAddonCheckout(addonId);
+        const stripe = getStripePlatform();
+        embeddedCheckout = await stripe.initEmbeddedCheckout({ clientSecret });
+        document.getElementById('addon-checkout-embed').innerHTML = '';
+        embeddedCheckout.mount('#addon-checkout-embed');
+      } catch(e) {
+        Utils.toast('Erreur: ' + e.message, 'error');
+        closeAddonCheckout();
+      }
+    }
+
+    function closeAddonCheckout() {
+      if (embeddedCheckout) { embeddedCheckout.destroy(); embeddedCheckout = null; }
+      document.getElementById('addonCheckoutOverlay').style.display = 'none';
+    }
+
+    // ─── INIT ───
+    Auth.init(async (user) => {
+      if (!user) { window.location.href = '/login.html'; return; }
+
+      const sub = await Auth.loadSubscription();
+      currentPlan = sub?.plan || 'free';
+      const planLabel = currentPlan.charAt(0).toUpperCase() + currentPlan.slice(1);
+
+      document.getElementById('sidebarPlan').innerHTML =
+        `<span class="badge ${currentPlan === 'pro' ? 'badge-primary' : currentPlan === 'scale' ? 'badge-success' : 'badge-outline'}">${planLabel}</span>`;
+
+      const badge = document.getElementById('heroPlanBadge');
+      badge.textContent = planLabel;
+      badge.className = `mp-hero-plan-name badge ${currentPlan === 'pro' ? 'badge-primary' : currentPlan === 'scale' ? 'badge-success' : 'badge-outline'}`;
+
+      // Load purchased addons
+      try {
+        const addonsDoc = await db.collection('addons').doc(user.uid).get();
+        purchasedAddons = addonsDoc.exists ? addonsDoc.data() : {};
+      } catch(e) { purchasedAddons = {}; }
+
+      document.getElementById('loader').style.display = 'none';
+      document.getElementById('marketplaceContent').style.display = '';
+      renderModules();
+    });
+  </script>
+</body>
+</html>
