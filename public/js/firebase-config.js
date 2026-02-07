@@ -21,7 +21,6 @@ const ROOT_DOMAIN = "scalevo.shop";
 firebase.initializeApp(FIREBASE_CONFIG);
 const auth = firebase.auth();
 const db = firebase.firestore();
-const storage = firebase.storage();
 
 // Stripe PLATEFORME (Scalevo) — pour les abonnements SaaS uniquement
 const STRIPE_PLATFORM_PK = "pk_live_51SskIW8pjDgglWAl2u4zPO4mNQuDH2n3v08TsMnKgUdzjlBOYQgWA5yW044zW8eodLhrd16cTvHcotAp8NcrpHhR006U7DJIY7"; // Ta clé publique Stripe Scalevo

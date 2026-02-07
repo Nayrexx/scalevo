@@ -17,8 +17,9 @@ service cloud.firestore {
 
     // --- STORES ---
     match /stores/{storeId} {
-      // Owner full access
-      allow read, update, delete: if request.auth != null && resource.data.ownerId == request.auth.uid;
+      // Owner: full access (get/list/update/delete)
+      allow get, update, delete: if request.auth != null && resource.data.ownerId == request.auth.uid;
+      allow list: if request.auth != null;
       allow create: if request.auth != null && request.resource.data.ownerId == request.auth.uid;
       // Public: read published stores (for storefront)
       allow get: if resource.data.published == true;
@@ -42,16 +43,18 @@ service cloud.firestore {
       allow read: if get(/databases/$(database)/documents/stores/$(storeId)).data.published == true;
     }
 
-    // --- ORDERS (subcollection of store) — written by Cloud Functions ---
+    // --- ORDERS (subcollection of store) — written by Netlify Functions ---
     match /stores/{storeId}/orders/{orderId} {
       allow read: if request.auth != null
         && get(/databases/$(database)/documents/stores/$(storeId)).data.ownerId == request.auth.uid;
+      // Allow write from server (admin SDK bypasses rules)
       allow write: if false;
     }
 
-    // --- SLUG LOOKUP (public read, written by owner or Functions) ---
+    // --- SLUG LOOKUP (public read, written by server via admin SDK) ---
     match /slugs/{slug} {
       allow read: if true;
+      // Slugs are created/deleted by Netlify Functions (admin SDK bypasses rules)
       allow write: if false;
     }
 
