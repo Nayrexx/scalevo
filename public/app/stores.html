@@ -49,15 +49,45 @@
 
       <div class="dashboard-content" id="content">
         <div class="loading-spinner" id="loader"><div class="spinner"></div></div>
-        <div id="storesList" class="stores-grid" style="display:none;"></div>
-        <div id="noStores" class="empty-state" style="display:none;">
-          <h3>Aucune boutique</h3>
-          <p>Crée ta première boutique pour commencer à vendre.</p>
-          <a href="/app/new-store.html" class="btn btn-primary">Créer ma boutique</a>
+
+        <!-- STORES LIST -->
+        <div id="storesSection" style="display:none;">
+          <div class="stores-header">
+            <div class="stores-header-info">
+              <h2>Mes boutiques</h2>
+              <span class="stores-count" id="storesCount">0 boutique(s)</span>
+            </div>
+            <a href="/app/new-store.html" class="btn btn-primary" id="newStoreBtn">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+              Nouvelle boutique
+            </a>
+          </div>
+          <div id="storesList" class="stores-grid-v2"></div>
         </div>
-        <div id="limitReached" class="empty-state" style="display:none;">
-          <p style="color:var(--warning);">⚠️ Tu as atteint la limite de boutiques de ton plan.</p>
-          <button class="btn btn-primary" onclick="openCheckoutModal()">Upgrader mon plan</button>
+
+        <!-- EMPTY STATE -->
+        <div id="noStores" class="empty-state-hero" style="display:none;">
+          <div class="empty-hero-icon">🏪</div>
+          <h2>Lance ta première boutique</h2>
+          <p>Crée ta boutique en quelques clics et commence à vendre dès aujourd'hui.</p>
+          <a href="/app/new-store.html" class="btn btn-primary btn-lg">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+            Créer ma boutique
+          </a>
+          <div class="empty-hero-hint">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+            Ça prend moins de 2 minutes
+          </div>
+        </div>
+
+        <!-- LIMIT REACHED -->
+        <div id="limitReached" class="limit-banner" style="display:none;">
+          <div class="limit-banner-icon">⚠️</div>
+          <div class="limit-banner-text">
+            <strong>Limite atteinte</strong>
+            <span>Tu as utilisé toutes tes boutiques sur ton plan actuel.</span>
+          </div>
+          <button class="btn btn-primary btn-sm" onclick="openCheckoutModal()">Upgrader</button>
         </div>
 
         <!-- PRICING MODAL -->
@@ -212,25 +242,40 @@
       if (stores.length === 0) {
         document.getElementById('noStores').style.display = '';
       } else {
-        document.getElementById('storesList').style.display = '';
-        document.getElementById('storesList').innerHTML = stores.map(store => `
-          <a href="/app/store.html?id=${store.id}" class="store-card">
-            <div class="store-card-header">
-              <h3>${Utils.escapeHtml(store.name)}</h3>
+        document.getElementById('storesSection').style.display = '';
+        document.getElementById('storesCount').textContent = stores.length + ' boutique' + (stores.length > 1 ? 's' : '');
+        document.getElementById('storesList').innerHTML = stores.map(store => {
+          const color = store.primaryColor || '#6C5CE7';
+          const initial = (store.name || 'B').charAt(0).toUpperCase();
+          const productCount = store.productCount || 0;
+          return `
+          <a href="/app/store.html?id=${store.id}" class="store-card-v2">
+            <div class="store-card-v2-top" style="background: linear-gradient(135deg, ${color}22, ${color}08);">
+              <div class="store-card-v2-icon" style="background:${color};">${initial}</div>
               <span class="badge ${store.published ? 'badge-success' : 'badge-outline'}">${store.published ? 'En ligne' : 'Brouillon'}</span>
             </div>
-            <p class="store-card-slug">${store.slug}.${ROOT_DOMAIN}</p>
-            <div class="store-card-footer">
-              <span>${store.productCount || 0} produit(s)</span>
+            <div class="store-card-v2-body">
+              <h3 class="store-card-v2-name">${Utils.escapeHtml(store.name)}</h3>
+              <span class="store-card-v2-url">${store.slug}.scalevo.shop</span>
+              <div class="store-card-v2-meta">
+                <span class="store-card-v2-stat">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 16V8a2 2 0 00-1-1.73l-7-4a2 2 0 00-2 0l-7 4A2 2 0 003 8v8a2 2 0 001 1.73l7 4a2 2 0 002 0l7-4A2 2 0 0021 16z"/></svg>
+                  ${productCount} produit${productCount !== 1 ? 's' : ''}
+                </span>
+                <span class="store-card-v2-arrow">
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+                </span>
+              </div>
             </div>
-          </a>
-        `).join('');
+          </a>`;
+        }).join('');
       }
 
       // Check if can create more stores
       if (stores.length >= limits.maxStores) {
         document.getElementById('limitReached').style.display = '';
-        document.querySelector('.topbar-right .btn').style.display = 'none';
+        const newStoreBtn = document.getElementById('newStoreBtn');
+        if (newStoreBtn) newStoreBtn.style.display = 'none';
       }
     });
   </script>

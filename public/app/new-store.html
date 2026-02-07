@@ -31,43 +31,129 @@
 
       <div class="dashboard-content">
         <div class="wizard">
-          <div class="card" style="max-width: 600px;">
-            <div class="card-body">
-              <h2 style="margin-bottom: 1.5rem;">Créer une nouvelle boutique</h2>
+          <div class="wizard-container">
+            <!-- PROGRESS BAR -->
+            <div class="wizard-progress">
+              <div class="wizard-step active" data-step="1">
+                <div class="wizard-step-circle">1</div>
+                <span>Identité</span>
+              </div>
+              <div class="wizard-step-line"></div>
+              <div class="wizard-step" data-step="2">
+                <div class="wizard-step-circle">2</div>
+                <span>Configuration</span>
+              </div>
+              <div class="wizard-step-line"></div>
+              <div class="wizard-step" data-step="3">
+                <div class="wizard-step-circle">3</div>
+                <span>Lancement</span>
+              </div>
+            </div>
 
-              <form id="createStoreForm">
-                <div class="form-group" style="margin-bottom: 1.25rem;">
-                  <label class="form-label">Nom de la boutique</label>
-                  <input type="text" id="storeName" class="input" placeholder="Ma Super Boutique" required>
+            <!-- STEP 1: IDENTITY -->
+            <div class="wizard-panel active" id="step1">
+              <div class="wizard-panel-header">
+                <span class="wizard-emoji">🏪</span>
+                <h2>Donne un nom à ta boutique</h2>
+                <p class="text-muted">C'est ce que tes clients verront. Tu pourras le changer après.</p>
+              </div>
+
+              <div class="form-group" style="margin-bottom:1.5rem;">
+                <label class="form-label">Nom de la boutique</label>
+                <input type="text" id="storeName" class="input input-lg" placeholder="Ex: FitGear, LumiDeco, SnapCase..." required autofocus>
+              </div>
+
+              <div class="form-group" style="margin-bottom:1.5rem;">
+                <label class="form-label">Adresse de ta boutique</label>
+                <div class="slug-input-wrapper">
+                  <input type="text" id="storeSlug" class="input input-lg" placeholder="ma-boutique" required>
+                  <span class="slug-suffix">.scalevo.shop</span>
                 </div>
+                <div id="slugStatus" class="slug-status"></div>
+              </div>
 
-                <div class="form-group" style="margin-bottom: 1.25rem;">
-                  <label class="form-label">Slug (URL)</label>
-                  <div style="display:flex; align-items:center; gap:0.5rem;">
-                    <input type="text" id="storeSlug" class="input" placeholder="ma-boutique" required style="flex:1;">
-                    <span style="color:var(--text-secondary); font-size:0.875rem; white-space:nowrap;">.scalevo.shop</span>
-                  </div>
-                  <div id="slugStatus" style="font-size:0.8rem; margin-top:0.375rem;"></div>
-                </div>
+              <button type="button" class="btn btn-primary btn-lg wizard-next-btn" id="toStep2" disabled onclick="goToStep(2)">
+                Continuer
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+              </button>
+            </div>
 
-                <div class="form-group" style="margin-bottom: 1.25rem;">
-                  <label class="form-label">Description (optionnel)</label>
-                  <textarea id="storeDesc" class="input" rows="3" placeholder="Décris ta boutique en quelques mots..."></textarea>
-                </div>
+            <!-- STEP 2: CONFIG -->
+            <div class="wizard-panel" id="step2">
+              <div class="wizard-panel-header">
+                <span class="wizard-emoji">⚙️</span>
+                <h2>Personnalise ta boutique</h2>
+                <p class="text-muted">Quelques détails pour bien démarrer.</p>
+              </div>
 
-                <div class="form-group" style="margin-bottom: 1.5rem;">
+              <div class="form-group" style="margin-bottom:1.5rem;">
+                <label class="form-label">Description <span class="text-muted">(optionnel)</span></label>
+                <textarea id="storeDesc" class="input" rows="3" placeholder="Décris ton activité en quelques mots..."></textarea>
+              </div>
+
+              <div class="form-row">
+                <div class="form-group">
                   <label class="form-label">Devise</label>
                   <select id="storeCurrency" class="input">
-                    <option value="EUR">EUR (€)</option>
-                    <option value="USD">USD ($)</option>
-                    <option value="GBP">GBP (£)</option>
+                    <option value="EUR">🇪🇺 EUR (€)</option>
+                    <option value="USD">🇺🇸 USD ($)</option>
+                    <option value="GBP">🇬🇧 GBP (£)</option>
                   </select>
                 </div>
+                <div class="form-group">
+                  <label class="form-label">Couleur principale</label>
+                  <div class="color-picker-row">
+                    <input type="color" id="storeColor" value="#6C5CE7" class="color-picker-input">
+                    <span class="color-picker-label" id="colorLabel">#6C5CE7</span>
+                  </div>
+                </div>
+              </div>
 
-                <button type="submit" class="btn btn-primary btn-lg" id="submitBtn" style="width:100%;" disabled>
-                  Créer la boutique
+              <div class="wizard-btn-row">
+                <button type="button" class="btn btn-outline btn-lg" onclick="goToStep(1)">
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+                  Retour
                 </button>
-              </form>
+                <button type="button" class="btn btn-primary btn-lg wizard-next-btn" onclick="goToStep(3)">
+                  Continuer
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+                </button>
+              </div>
+            </div>
+
+            <!-- STEP 3: LAUNCH -->
+            <div class="wizard-panel" id="step3">
+              <div class="wizard-panel-header">
+                <span class="wizard-emoji">🚀</span>
+                <h2>Prêt à lancer !</h2>
+                <p class="text-muted">Vérifie le récap et lance ta boutique.</p>
+              </div>
+
+              <div class="recap-card">
+                <div class="recap-row">
+                  <span class="recap-label">Nom</span>
+                  <span class="recap-value" id="recapName">—</span>
+                </div>
+                <div class="recap-row">
+                  <span class="recap-label">URL</span>
+                  <span class="recap-value recap-url" id="recapUrl">—</span>
+                </div>
+                <div class="recap-row">
+                  <span class="recap-label">Devise</span>
+                  <span class="recap-value" id="recapCurrency">—</span>
+                </div>
+              </div>
+
+              <div class="wizard-btn-row">
+                <button type="button" class="btn btn-outline btn-lg" onclick="goToStep(2)">
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+                  Retour
+                </button>
+                <button type="button" class="btn btn-primary btn-lg wizard-next-btn" id="submitBtn" onclick="submitStore()">
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M22 11.08V12a10 10 0 11-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+                  Créer ma boutique
+                </button>
+              </div>
             </div>
           </div>
         </div>
@@ -96,6 +182,41 @@
     });
 
     let slugValid = false;
+    let currentStep = 1;
+
+    // Color picker preview
+    document.getElementById('storeColor').addEventListener('input', (e) => {
+      document.getElementById('colorLabel').textContent = e.target.value;
+    });
+
+    // ── Wizard navigation ──
+    function goToStep(step) {
+      if (step === 2 && !slugValid) return;
+
+      // Update recap on step 3
+      if (step === 3) {
+        document.getElementById('recapName').textContent = document.getElementById('storeName').value.trim() || '—';
+        document.getElementById('recapUrl').textContent = (document.getElementById('storeSlug').value.trim() || '—') + '.scalevo.shop';
+        const currencyMap = { EUR: '🇪🇺 EUR (€)', USD: '🇺🇸 USD ($)', GBP: '🇬🇧 GBP (£)' };
+        document.getElementById('recapCurrency').textContent = currencyMap[document.getElementById('storeCurrency').value] || 'EUR';
+      }
+
+      // Animate out current, animate in next
+      document.querySelectorAll('.wizard-panel').forEach(p => p.classList.remove('active'));
+      document.getElementById('step' + step).classList.add('active');
+
+      // Update progress
+      document.querySelectorAll('.wizard-step').forEach(s => {
+        const n = parseInt(s.dataset.step);
+        s.classList.toggle('active', n <= step);
+        s.classList.toggle('completed', n < step);
+      });
+      document.querySelectorAll('.wizard-step-line').forEach((l, i) => {
+        l.classList.toggle('active', (i + 1) < step);
+      });
+
+      currentStep = step;
+    }
 
     // Auto-generate slug from name
     document.getElementById('storeName').addEventListener('input', (e) => {
@@ -113,60 +234,60 @@
 
     const checkSlug = Utils.debounce(async (slug) => {
       const statusEl = document.getElementById('slugStatus');
-      const btn = document.getElementById('submitBtn');
+      const btn = document.getElementById('toStep2');
 
       if (!slug || slug.length < 3) {
-        statusEl.innerHTML = '<span style="color:var(--text-secondary);">Minimum 3 caractères</span>';
+        statusEl.innerHTML = '<span class="slug-hint">Minimum 3 caractères</span>';
         slugValid = false;
         btn.disabled = true;
         return;
       }
 
       if (!Utils.isValidSlug(slug)) {
-        statusEl.innerHTML = '<span style="color:#ef4444;">Ce slug est réservé ou invalide</span>';
+        statusEl.innerHTML = '<span class="slug-error">✗ Ce nom est réservé ou invalide</span>';
         slugValid = false;
         btn.disabled = true;
         return;
       }
 
-      statusEl.innerHTML = '<span style="color:var(--text-secondary);">Vérification...</span>';
+      statusEl.innerHTML = '<span class="slug-hint">Vérification...</span>';
       const available = await DB.isSlugAvailable(slug);
 
       if (available) {
-        statusEl.innerHTML = '<span style="color:#22c55e;">✓ Disponible</span>';
+        statusEl.innerHTML = '<span class="slug-ok">✓ ' + slug + '.scalevo.shop est disponible !</span>';
         slugValid = true;
         btn.disabled = false;
       } else {
-        statusEl.innerHTML = '<span style="color:#ef4444;">✗ Déjà pris</span>';
+        statusEl.innerHTML = '<span class="slug-error">✗ Déjà pris — essaie un autre nom</span>';
         slugValid = false;
         btn.disabled = true;
       }
     }, 400);
 
     // Submit
-    document.getElementById('createStoreForm').addEventListener('submit', async (e) => {
-      e.preventDefault();
+    async function submitStore() {
       if (!slugValid) return;
 
       const btn = document.getElementById('submitBtn');
       btn.disabled = true;
-      btn.textContent = 'Création en cours...';
+      btn.innerHTML = '<div class="spinner" style="width:20px;height:20px;border-width:2px;"></div> Création en cours...';
 
       try {
         const result = await API.createStore({
           name: document.getElementById('storeName').value.trim(),
           slug: document.getElementById('storeSlug').value.trim(),
           description: document.getElementById('storeDesc').value.trim(),
-          currency: document.getElementById('storeCurrency').value
+          currency: document.getElementById('storeCurrency').value,
+          primaryColor: document.getElementById('storeColor').value
         });
         Utils.toast('Boutique créée !', 'success');
         window.location.href = '/app/store.html?id=' + result.storeId;
       } catch (err) {
         Utils.toast('Erreur: ' + err.message, 'error');
         btn.disabled = false;
-        btn.textContent = 'Créer la boutique';
+        btn.innerHTML = '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M22 11.08V12a10 10 0 11-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg> Créer ma boutique';
       }
-    });
+    }
 
     Auth.init((user) => {
       if (!user) window.location.href = '/login.html';
