@@ -60,19 +60,87 @@
           <button class="btn btn-primary" onclick="openCheckoutModal()">Upgrader mon plan</button>
         </div>
 
-        <!-- EMBEDDED CHECKOUT MODAL -->
-        <div id="checkoutOverlay" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,.7); z-index:1000; display:none; align-items:center; justify-content:center;">
-          <div style="background:var(--surface); border-radius:1rem; padding:2rem; width:95%; max-width:500px; max-height:90vh; overflow-y:auto; position:relative;">
-            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1rem;">
-              <h3>Choisir un plan</h3>
-              <button class="btn btn-outline btn-sm" onclick="closeCheckoutModal()">✕</button>
+        <!-- PRICING MODAL -->
+        <div id="checkoutOverlay" class="pricing-overlay">
+          <div class="pricing-modal">
+            <button class="pricing-close" onclick="closeCheckoutModal()">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+            </button>
+
+            <div id="planPicker">
+              <div class="pricing-header">
+                <h2 class="pricing-title">Passe au niveau supérieur</h2>
+                <p class="pricing-subtitle">Choisis le plan adapté à tes ambitions</p>
+              </div>
+
+              <div class="pricing-grid">
+                <!-- STARTER -->
+                <div class="pricing-card">
+                  <div class="pricing-card-head">
+                    <span class="pricing-icon">⚡</span>
+                    <h3 class="pricing-plan-name">Starter</h3>
+                    <p class="pricing-desc">Idéal pour tester</p>
+                  </div>
+                  <div class="pricing-amount">
+                    <span class="pricing-currency">€</span>
+                    <span class="pricing-number">9</span>
+                    <span class="pricing-period">/mois</span>
+                  </div>
+                  <ul class="pricing-features">
+                    <li><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--success)" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg> 1 boutique</li>
+                    <li><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--success)" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg> Produits illimités</li>
+                    <li><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--success)" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg> Sous-domaine inclus</li>
+                  </ul>
+                  <button class="btn-pricing" onclick="startCheckout('starter')">Commencer</button>
+                </div>
+
+                <!-- PRO -->
+                <div class="pricing-card pricing-card--popular">
+                  <div class="pricing-badge">Populaire</div>
+                  <div class="pricing-card-head">
+                    <span class="pricing-icon">🚀</span>
+                    <h3 class="pricing-plan-name">Pro</h3>
+                    <p class="pricing-desc">Pour scaler sérieusement</p>
+                  </div>
+                  <div class="pricing-amount">
+                    <span class="pricing-currency">€</span>
+                    <span class="pricing-number">29</span>
+                    <span class="pricing-period">/mois</span>
+                  </div>
+                  <ul class="pricing-features">
+                    <li><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--success)" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg> 3 boutiques</li>
+                    <li><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--success)" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg> Produits illimités</li>
+                    <li><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--success)" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg> Upsell intégré</li>
+                    <li><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--success)" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg> Support prioritaire</li>
+                  </ul>
+                  <button class="btn-pricing btn-pricing--primary" onclick="startCheckout('pro')">Choisir Pro</button>
+                </div>
+
+                <!-- SCALE -->
+                <div class="pricing-card">
+                  <div class="pricing-card-head">
+                    <span class="pricing-icon">💎</span>
+                    <h3 class="pricing-plan-name">Scale</h3>
+                    <p class="pricing-desc">Pour les machines</p>
+                  </div>
+                  <div class="pricing-amount">
+                    <span class="pricing-currency">€</span>
+                    <span class="pricing-number">59</span>
+                    <span class="pricing-period">/mois</span>
+                  </div>
+                  <ul class="pricing-features">
+                    <li><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--success)" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg> Boutiques illimitées</li>
+                    <li><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--success)" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg> Produits illimités</li>
+                    <li><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--success)" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg> Upsell intégré</li>
+                    <li><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--success)" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg> Support VIP</li>
+                  </ul>
+                  <button class="btn-pricing" onclick="startCheckout('scale')">Choisir Scale</button>
+                </div>
+              </div>
             </div>
-            <div id="planPicker" style="display:flex; flex-direction:column; gap:0.75rem;">
-              <button class="btn btn-primary" style="width:100%;" onclick="startCheckout('starter')">⚡ Starter — 9€/mois (1 boutique)</button>
-              <button class="btn btn-primary" style="width:100%;" onclick="startCheckout('pro')">🚀 Pro — 29€/mois (3 boutiques)</button>
-              <button class="btn btn-primary" style="width:100%;" onclick="startCheckout('scale')">💎 Scale — 59€/mois (illimité)</button>
-            </div>
-            <div id="checkout-embed" style="min-height:0;"></div>
+
+            <!-- Stripe embed goes here -->
+            <div id="checkout-embed"></div>
           </div>
         </div>
       </div>

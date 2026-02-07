@@ -62,11 +62,54 @@
                 </div>
                 <div id="subLimits" style="font-size:0.875rem; color:var(--text-secondary); margin-bottom:1rem;"></div>
               </div>
-              <div id="planButtons" style="display:flex; gap:1rem; flex-wrap:wrap;">
-                <button class="btn btn-primary" id="upgradeBtn" onclick="openCheckout('starter')">Starter — 9€/mois</button>
-                <button class="btn btn-primary" id="upgradeProBtn" onclick="openCheckout('pro')">Pro — 29€/mois</button>
-                <button class="btn btn-primary" id="upgradeScaleBtn" onclick="openCheckout('scale')">Scale — 59€/mois</button>
-                <button class="btn btn-outline" id="portalBtn" onclick="openBillingPortal()" style="display:none;">Gérer la facturation</button>
+
+              <div id="planButtons">
+                <div class="pricing-grid pricing-grid--account">
+                  <!-- STARTER -->
+                  <div class="pricing-card pricing-card--compact" id="cardStarter">
+                    <div class="pricing-card-head">
+                      <span class="pricing-icon">⚡</span>
+                      <h3 class="pricing-plan-name">Starter</h3>
+                    </div>
+                    <div class="pricing-amount">
+                      <span class="pricing-currency">€</span><span class="pricing-number">9</span><span class="pricing-period">/mois</span>
+                    </div>
+                    <ul class="pricing-features">
+                      <li><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--success)" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg> 1 boutique</li>
+                    </ul>
+                    <button class="btn-pricing" onclick="openCheckout('starter')">Choisir</button>
+                  </div>
+                  <!-- PRO -->
+                  <div class="pricing-card pricing-card--compact pricing-card--popular" id="cardPro">
+                    <div class="pricing-badge">Populaire</div>
+                    <div class="pricing-card-head">
+                      <span class="pricing-icon">🚀</span>
+                      <h3 class="pricing-plan-name">Pro</h3>
+                    </div>
+                    <div class="pricing-amount">
+                      <span class="pricing-currency">€</span><span class="pricing-number">29</span><span class="pricing-period">/mois</span>
+                    </div>
+                    <ul class="pricing-features">
+                      <li><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--success)" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg> 3 boutiques + Upsell</li>
+                    </ul>
+                    <button class="btn-pricing btn-pricing--primary" onclick="openCheckout('pro')">Choisir</button>
+                  </div>
+                  <!-- SCALE -->
+                  <div class="pricing-card pricing-card--compact" id="cardScale">
+                    <div class="pricing-card-head">
+                      <span class="pricing-icon">💎</span>
+                      <h3 class="pricing-plan-name">Scale</h3>
+                    </div>
+                    <div class="pricing-amount">
+                      <span class="pricing-currency">€</span><span class="pricing-number">59</span><span class="pricing-period">/mois</span>
+                    </div>
+                    <ul class="pricing-features">
+                      <li><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--success)" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg> Illimité + VIP</li>
+                    </ul>
+                    <button class="btn-pricing" onclick="openCheckout('scale')">Choisir</button>
+                  </div>
+                </div>
+                <button class="btn btn-outline" id="portalBtn" onclick="openBillingPortal()" style="display:none; margin-top:1rem;">Gérer la facturation</button>
               </div>
             </div>
           </div>
@@ -76,7 +119,7 @@
             <div class="card-body">
               <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1rem;">
                 <h3>Paiement</h3>
-                <button class="btn btn-outline btn-sm" onclick="closeCheckout()">✕ Annuler</button>
+                <button class="btn btn-outline btn-sm" onclick="closeCheckout()"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg> Retour</button>
               </div>
               <div id="checkout-container" style="min-height:300px;"></div>
             </div>
@@ -165,20 +208,26 @@
       document.getElementById('subPlan').textContent = planName.charAt(0).toUpperCase() + planName.slice(1);
       document.getElementById('subPlan').className = `badge ${planName === 'pro' ? 'badge-primary' : planName === 'scale' ? 'badge-success' : 'badge-outline'}`;
       document.getElementById('subStatus').textContent = sub?.status === 'active' ? 'Actif' : sub?.status || '';
-      document.getElementById('subLimits').textContent = `${limits.maxStores} boutique(s) max`;
+      document.getElementById('subLimits').textContent = `${limits.maxStores === 999 ? '∞' : limits.maxStores} boutique(s) max`;
 
       // Hide plans already below current, show portal if subscribed
       if (planName === 'starter') {
-        document.getElementById('upgradeBtn').style.display = 'none';
+        document.getElementById('cardStarter').classList.add('pricing-card--current');
+        document.getElementById('cardStarter').querySelector('.btn-pricing').textContent = 'Plan actuel';
+        document.getElementById('cardStarter').querySelector('.btn-pricing').disabled = true;
         document.getElementById('portalBtn').style.display = '';
       } else if (planName === 'pro') {
-        document.getElementById('upgradeBtn').style.display = 'none';
-        document.getElementById('upgradeProBtn').style.display = 'none';
+        document.getElementById('cardStarter').style.display = 'none';
+        document.getElementById('cardPro').classList.add('pricing-card--current');
+        document.getElementById('cardPro').querySelector('.btn-pricing').textContent = 'Plan actuel';
+        document.getElementById('cardPro').querySelector('.btn-pricing').disabled = true;
         document.getElementById('portalBtn').style.display = '';
       } else if (planName === 'scale') {
-        document.getElementById('upgradeBtn').style.display = 'none';
-        document.getElementById('upgradeProBtn').style.display = 'none';
-        document.getElementById('upgradeScaleBtn').style.display = 'none';
+        document.getElementById('cardStarter').style.display = 'none';
+        document.getElementById('cardPro').style.display = 'none';
+        document.getElementById('cardScale').classList.add('pricing-card--current');
+        document.getElementById('cardScale').querySelector('.btn-pricing').textContent = 'Plan actuel';
+        document.getElementById('cardScale').querySelector('.btn-pricing').disabled = true;
         document.getElementById('portalBtn').style.display = '';
       }
 
