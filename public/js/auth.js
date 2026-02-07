@@ -7,7 +7,8 @@ const Auth = {
   subscription: null,
   _listeners: [],
 
-  init() {
+  init(callback) {
+    if (callback) this._listeners.push(callback);
     return new Promise((resolve) => {
       auth.onAuthStateChanged(async (user) => {
         this.currentUser = user;
