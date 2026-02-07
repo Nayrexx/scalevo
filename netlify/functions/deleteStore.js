@@ -30,6 +30,32 @@ exports.handler = async (event) => {
     if (slug) batch.delete(db.collection('slugs').doc(slug));
 
     await batch.commit();
+
+    // Delete Cloudflare DNS record for subdomain
+    if (slug) {
+      try {
+        const cfZoneId = process.env.CLOUDFLARE_ZONE_ID;
+        const cfToken = process.env.CLOUDFLARE_API_TOKEN;
+        if (cfZoneId && cfToken) {
+          const fetch = require('node-fetch');
+          // Find the DNS record ID
+          const listRes = await fetch(`https://api.cloudflare.com/client/v4/zones/${cfZoneId}/dns_records?name=${slug}.scalevo.shop&type=CNAME`, {
+            headers: { 'Authorization': `Bearer ${cfToken}` },
+          });
+          const listData = await listRes.json();
+          if (listData.result && listData.result.length > 0) {
+            const recordId = listData.result[0].id;
+            await fetch(`https://api.cloudflare.com/client/v4/zones/${cfZoneId}/dns_records/${recordId}`, {
+              method: 'DELETE',
+              headers: { 'Authorization': `Bearer ${cfToken}` },
+            });
+          }
+        }
+      } catch (dnsErr) {
+        console.error('Cloudflare DNS deletion failed (non-blocking):', dnsErr);
+      }
+    }
+
     return ok({ success: true });
   } catch (err) {
     console.error('deleteStore error:', err);

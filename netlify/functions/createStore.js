@@ -50,6 +50,31 @@ exports.handler = async (event) => {
     });
     await batch.commit();
 
+    // Create Cloudflare DNS record for subdomain (slug.scalevo.shop)
+    try {
+      const cfZoneId = process.env.CLOUDFLARE_ZONE_ID;
+      const cfToken = process.env.CLOUDFLARE_API_TOKEN;
+      if (cfZoneId && cfToken) {
+        const fetch = require('node-fetch');
+        await fetch(`https://api.cloudflare.com/client/v4/zones/${cfZoneId}/dns_records`, {
+          method: 'POST',
+          headers: {
+            'Authorization': `Bearer ${cfToken}`,
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            type: 'CNAME',
+            name: slug,
+            content: 'scalevo.netlify.app',
+            proxied: true,
+            ttl: 1,
+          }),
+        });
+      }
+    } catch (dnsErr) {
+      console.error('Cloudflare DNS creation failed (non-blocking):', dnsErr);
+    }
+
     return ok({ storeId: storeRef.id });
   } catch (err) {
     console.error('createStore error:', err);
