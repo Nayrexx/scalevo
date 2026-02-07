@@ -6,6 +6,25 @@
   node_bundler = "esbuild"
   included_files = ["netlify/functions/_utils.js"]
 
+# ═══════════════════════════════════════════════
+# SUBDOMAIN ROUTING (via Cloudflare)
+# ═══════════════════════════════════════════════
+# Cloudflare Worker handles subdomain detection:
+#   slug.scalevo.shop → proxied to scalevo.netlify.app/storefront.html?slug=SLUG
+# Netlify just needs to serve the right files.
+#
+# SETUP:
+#   - DNS managed by Cloudflare (free plan)
+#   - Cloudflare Worker routes subdomains
+#   - Netlify serves static files + functions
+# ═══════════════════════════════════════════════
+
+# API functions shortcut
+[[redirects]]
+  from = "/api/*"
+  to = "/.netlify/functions/:splat"
+  status = 200
+
 [[headers]]
   for = "/*.js"
   [headers.values]

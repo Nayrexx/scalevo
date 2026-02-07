@@ -52,6 +52,28 @@
             </div>
           </div>
 
+          <!-- SECURITY -->
+          <div class="card" style="margin-bottom:2rem;">
+            <div class="card-body">
+              <h3 style="margin-bottom:1rem;">Sécurité</h3>
+              <form id="passwordForm">
+                <div class="form-group" style="margin-bottom:1rem;">
+                  <label class="form-label">Mot de passe actuel</label>
+                  <input type="password" id="currentPassword" class="input" required placeholder="••••••••">
+                </div>
+                <div class="form-group" style="margin-bottom:1rem;">
+                  <label class="form-label">Nouveau mot de passe</label>
+                  <input type="password" id="newPassword" class="input" required placeholder="Min. 6 caractères" minlength="6">
+                </div>
+                <div class="form-group" style="margin-bottom:1rem;">
+                  <label class="form-label">Confirmer le nouveau mot de passe</label>
+                  <input type="password" id="confirmPassword" class="input" required placeholder="••••••••" minlength="6">
+                </div>
+                <button type="submit" class="btn btn-outline">Changer le mot de passe</button>
+              </form>
+            </div>
+          </div>
+
           <!-- SUBSCRIPTION -->
           <div class="card" style="margin-bottom:2rem;">
             <div class="card-body">
@@ -194,6 +216,28 @@
         await DB.updateUser(auth.currentUser.uid, { name });
         Utils.toast('Profil mis à jour', 'success');
       } catch(e) { Utils.toast('Erreur: ' + e.message, 'error'); }
+    });
+
+    document.getElementById('passwordForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const current = document.getElementById('currentPassword').value;
+      const newPwd = document.getElementById('newPassword').value;
+      const confirm = document.getElementById('confirmPassword').value;
+
+      if (newPwd !== confirm) { Utils.toast('Les mots de passe ne correspondent pas', 'error'); return; }
+      if (newPwd.length < 6) { Utils.toast('Minimum 6 caractères', 'error'); return; }
+
+      try {
+        // Re-authenticate
+        const credential = firebase.auth.EmailAuthProvider.credential(auth.currentUser.email, current);
+        await auth.currentUser.reauthenticateWithCredential(credential);
+        await auth.currentUser.updatePassword(newPwd);
+        document.getElementById('passwordForm').reset();
+        Utils.toast('Mot de passe changé avec succès', 'success');
+      } catch(e) {
+        if (e.code === 'auth/wrong-password') Utils.toast('Mot de passe actuel incorrect', 'error');
+        else Utils.toast('Erreur: ' + e.message, 'error');
+      }
     });
 
     Auth.init(async (user) => {

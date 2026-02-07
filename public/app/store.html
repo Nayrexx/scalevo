@@ -28,8 +28,8 @@
         <button class="mobile-sidebar-toggle" id="sidebarToggle"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="18" x2="21" y2="18"/></svg></button>
         <h1 class="topbar-title" id="storeName">Boutique</h1>
         <div class="topbar-right">
-          <a id="previewLink" href="#" target="_blank" class="btn btn-outline btn-sm" style="display:none;">Voir la boutique ↗</a>
-          <button id="publishBtn" class="btn btn-primary btn-sm" style="display:none;" onclick="togglePublish()">Publier</button>
+          <a id="topPreviewLink" href="#" target="_blank" class="btn btn-outline btn-sm" style="display:none;">Voir la boutique ↗</a>
+          <button id="topPublishBtn" class="btn btn-primary btn-sm" style="display:none;" onclick="togglePublish()">Publier</button>
         </div>
       </header>
 
@@ -47,11 +47,71 @@
           </div>
           <div class="store-banner-actions">
             <span class="badge" id="storeBannerStatus">Brouillon</span>
-            <a id="previewLink" href="#" target="_blank" class="btn btn-outline btn-sm">
+            <a id="previewLink" href="#" target="_blank" class="btn btn-outline btn-sm" title="Prévisualiser même si non publiée">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+              Prévisualiser
+            </a>
+            <a id="liveLink" href="#" target="_blank" class="btn btn-outline btn-sm" style="display:none;">
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
-              Voir
+              Voir en ligne ↗
             </a>
             <button id="publishBtn" class="btn btn-primary btn-sm" onclick="togglePublish()">Publier</button>
+          </div>
+        </div>
+
+        <!-- ONBOARDING CHECKLIST -->
+        <div class="onboarding-checklist" id="onboarding" style="display:none;">
+          <div class="onboarding-header">
+            <h3><span>🎯</span> Configure ta boutique</h3>
+            <span class="onboarding-progress" id="onboardingProgress">0/4</span>
+          </div>
+          <div class="onboarding-bar">
+            <div class="onboarding-bar-fill" id="onboardingBar" style="width:0%"></div>
+          </div>
+          <div class="onboarding-steps">
+            <div class="onboarding-step completed" id="obStep1">
+              <div class="onboarding-check">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>
+              </div>
+              <div class="onboarding-step-text">
+                <strong>Créer la boutique</strong>
+                <span>Nom, URL, design</span>
+              </div>
+              <svg class="onboarding-step-arrow" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+            </div>
+            <div class="onboarding-step" id="obStep2" onclick="switchToTab('settings')">
+              <div class="onboarding-check">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>
+              </div>
+              <div class="onboarding-step-text">
+                <strong>Connecter Stripe</strong>
+                <span>Pour recevoir les paiements</span>
+              </div>
+              <svg class="onboarding-step-arrow" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+            </div>
+            <div class="onboarding-step" id="obStep3" onclick="showProductModal()">
+              <div class="onboarding-check">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>
+              </div>
+              <div class="onboarding-step-text">
+                <strong>Ajouter un produit</strong>
+                <span>Nom, prix, images, description</span>
+              </div>
+              <svg class="onboarding-step-arrow" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+            </div>
+            <div class="onboarding-step" id="obStep4" onclick="togglePublish()">
+              <div class="onboarding-check">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>
+              </div>
+              <div class="onboarding-step-text">
+                <strong>Publier ta boutique</strong>
+                <span>Un clic et tu es en ligne !</span>
+              </div>
+              <svg class="onboarding-step-arrow" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+            </div>
+          </div>
+          <div class="onboarding-dismiss">
+            <button onclick="dismissOnboarding()">Masquer le guide</button>
           </div>
         </div>
 
@@ -68,6 +128,14 @@
           <button class="tab-btn" data-tab="funnel">
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"/></svg>
             Funnel
+          </button>
+          <button class="tab-btn" data-tab="promos">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="19" y1="5" x2="5" y2="19"/><circle cx="6.5" cy="6.5" r="2.5"/><circle cx="17.5" cy="17.5" r="2.5"/></svg>
+            Promos
+          </button>
+          <button class="tab-btn" data-tab="analytics">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="20" x2="12" y2="10"/><line x1="18" y1="20" x2="18" y2="4"/><line x1="6" y1="20" x2="6" y2="16"/></svg>
+            Analytics
           </button>
           <button class="tab-btn" data-tab="settings">
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83-2.83l.06-.06A1.65 1.65 0 004.68 15a1.65 1.65 0 00-1.51-1H3a2 2 0 010-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 012.83-2.83l.06.06A1.65 1.65 0 009 4.68a1.65 1.65 0 001-1.51V3a2 2 0 014 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 2.83l-.06.06A1.65 1.65 0 0019.4 9a1.65 1.65 0 001.51 1H21a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1z"/></svg>
@@ -106,6 +174,10 @@
               <h3>Commandes</h3>
               <p class="text-muted text-sm">Suivi de tes ventes en temps réel</p>
             </div>
+            <button class="btn btn-outline btn-sm" onclick="exportOrdersCSV()">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+              Exporter CSV
+            </button>
           </div>
           <div class="stats-grid stats-grid--3" id="orderStats" style="margin-bottom:1.5rem;">
             <div class="stat-card">
@@ -186,6 +258,63 @@
           </div>
         </div>
 
+        <!-- TAB: PROMOS ────────────────────── -->
+        <div class="tab-content" id="tab-promos" style="display:none;">
+          <div class="tab-header">
+            <div>
+              <h3>Codes promo</h3>
+              <p class="text-muted text-sm">Crée des réductions pour booster tes ventes</p>
+            </div>
+            <button class="btn btn-primary btn-sm" onclick="showPromoModal()">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+              Nouveau code
+            </button>
+          </div>
+          <div id="promosList"></div>
+          <div id="noPromos" class="empty-state-v2" style="display:none;">
+            <div class="empty-icon">🏷️</div>
+            <h3>Aucun code promo</h3>
+            <p>Crée ton premier code promo pour attirer des clients.</p>
+            <button class="btn btn-primary" onclick="showPromoModal()">Créer un code promo</button>
+          </div>
+        </div>
+
+        <!-- TAB: ANALYTICS ─────────────────── -->
+        <div class="tab-content" id="tab-analytics" style="display:none;">
+          <div class="tab-header">
+            <div>
+              <h3>Analytics</h3>
+              <p class="text-muted text-sm">Statistiques de ta boutique</p>
+            </div>
+          </div>
+          <div class="stats-grid stats-grid--3" style="margin-bottom:1.5rem;">
+            <div class="stat-card">
+              <div class="stat-icon">👁️</div>
+              <div class="stat-label">Vues (30j)</div>
+              <div class="stat-value" id="analyticsViews">0</div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-icon">🛒</div>
+              <div class="stat-label">Commandes (30j)</div>
+              <div class="stat-value" id="analyticsOrders">0</div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-icon">📈</div>
+              <div class="stat-label">Taux de conversion</div>
+              <div class="stat-value" id="analyticsConversion">0%</div>
+            </div>
+          </div>
+          <div class="card">
+            <div class="card-body">
+              <h4 style="margin-bottom:1rem;">Vues par jour (30 derniers jours)</h4>
+              <div class="analytics-chart" id="analyticsChart">
+                <div class="chart-bars" id="analyticsChartBars"></div>
+                <div class="chart-labels" id="analyticsChartLabels"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+
         <!-- TAB: SETTINGS ──────────────────── -->
         <div class="tab-content" id="tab-settings" style="display:none;">
           <div class="tab-header">
@@ -217,6 +346,35 @@
                     <div class="color-picker-row">
                       <input type="color" id="settingColor" value="#6C5CE7" class="color-picker-input">
                       <span class="color-picker-label" id="settingColorLabel">#6C5CE7</span>
+                    </div>
+                  </div>
+                  <div class="form-group" style="margin-bottom:1.5rem;">
+                    <label class="form-label">Thème de la boutique</label>
+                    <div class="theme-selector">
+                      <label class="theme-option">
+                        <input type="radio" name="storeTheme" value="classic" checked>
+                        <div class="theme-preview theme-preview--classic">
+                          <div class="theme-preview-bar"></div>
+                          <div class="theme-preview-content"><div></div><div></div></div>
+                        </div>
+                        <span>Classique</span>
+                      </label>
+                      <label class="theme-option">
+                        <input type="radio" name="storeTheme" value="minimal">
+                        <div class="theme-preview theme-preview--minimal">
+                          <div class="theme-preview-bar"></div>
+                          <div class="theme-preview-content"><div></div><div></div></div>
+                        </div>
+                        <span>Minimaliste</span>
+                      </label>
+                      <label class="theme-option">
+                        <input type="radio" name="storeTheme" value="bold">
+                        <div class="theme-preview theme-preview--bold">
+                          <div class="theme-preview-bar"></div>
+                          <div class="theme-preview-content"><div></div><div></div></div>
+                        </div>
+                        <span>Bold</span>
+                      </label>
                     </div>
                   </div>
                   <button type="submit" class="btn btn-primary" style="width:100%;">Sauvegarder</button>
@@ -296,6 +454,10 @@
             </div>
           </div>
           <div class="form-group" style="margin-bottom:1.25rem;">
+            <label class="form-label">Stock disponible <span class="text-muted">optionnel — vide = illimité</span></label>
+            <input type="number" id="prodStock" class="input" min="0" placeholder="Ex: 50 (vide = illimité)">
+          </div>
+          <div class="form-group" style="margin-bottom:1.25rem;">
             <label class="form-label">Images (URLs, une par ligne)</label>
             <textarea id="prodImages" class="input" rows="3" placeholder="https://example.com/image1.jpg&#10;https://example.com/image2.jpg"></textarea>
           </div>
@@ -317,6 +479,60 @@
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M19 21H5a2 2 0 01-2-2V5a2 2 0 012-2h11l5 5v11a2 2 0 01-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
             Sauvegarder
           </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- PROMO CODE MODAL ─────────────────────── -->
+  <div class="modal-overlay" id="promoModal">
+    <div class="modal" style="max-width:480px;">
+      <div class="modal-header">
+        <h3 id="promoModalTitle">Nouveau code promo</h3>
+        <button class="modal-close" onclick="closePromoModal()">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+        </button>
+      </div>
+      <form id="promoForm">
+        <div class="modal-body">
+          <div class="form-group" style="margin-bottom:1.25rem;">
+            <label class="form-label">Code</label>
+            <input type="text" id="promoCode" class="input" required placeholder="Ex: BIENVENUE20" style="text-transform:uppercase;">
+          </div>
+          <div class="form-row" style="margin-bottom:1.25rem;">
+            <div class="form-group">
+              <label class="form-label">Type de réduction</label>
+              <select id="promoType" class="input">
+                <option value="percent">Pourcentage (%)</option>
+                <option value="fixed">Montant fixe (€)</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Valeur</label>
+              <input type="number" id="promoValue" class="input" step="0.01" required placeholder="20">
+            </div>
+          </div>
+          <div class="form-row" style="margin-bottom:1.25rem;">
+            <div class="form-group">
+              <label class="form-label">Utilisations max <span class="text-muted">optionnel</span></label>
+              <input type="number" id="promoMaxUse" class="input" min="0" placeholder="Illimité">
+            </div>
+            <div class="form-group">
+              <label class="form-label">Date d'expiration <span class="text-muted">optionnel</span></label>
+              <input type="date" id="promoExpiry" class="input">
+            </div>
+          </div>
+          <div class="form-group">
+            <label class="toggle-label">
+              <input type="checkbox" id="promoActive" class="toggle-input" checked>
+              <span class="toggle-switch"></span>
+              <span>Actif</span>
+            </label>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-outline" onclick="closePromoModal()">Annuler</button>
+          <button type="submit" class="btn btn-primary">Sauvegarder</button>
         </div>
       </form>
     </div>
@@ -350,14 +566,18 @@
 
     document.querySelectorAll('.tab-btn').forEach(tab => {
       tab.addEventListener('click', () => {
-        document.querySelectorAll('.tab-btn').forEach(t => t.classList.remove('active'));
-        document.querySelectorAll('.tab-content').forEach(c => { c.classList.remove('active'); c.style.display = 'none'; });
-        tab.classList.add('active');
-        const target = document.getElementById('tab-' + tab.dataset.tab);
-        target.classList.add('active');
-        target.style.display = '';
+        switchToTab(tab.dataset.tab);
       });
     });
+
+    function switchToTab(name) {
+      document.querySelectorAll('.tab-btn').forEach(t => t.classList.remove('active'));
+      document.querySelectorAll('.tab-content').forEach(c => { c.classList.remove('active'); c.style.display = 'none'; });
+      const btn = document.querySelector(`.tab-btn[data-tab="${name}"]`);
+      if (btn) btn.classList.add('active');
+      const target = document.getElementById('tab-' + name);
+      if (target) { target.classList.add('active'); target.style.display = ''; }
+    }
 
     // ─── Products ───
     function renderProducts() {
@@ -378,6 +598,7 @@
           </div>
           <div class="product-row-status">
             <span class="badge ${p.published ? 'badge-success' : 'badge-outline'}">${p.published ? 'Publié' : 'Brouillon'}</span>
+            ${p.stock != null ? `<span class="badge ${p.stock <= 5 ? 'badge-danger' : 'badge-outline'}" style="margin-left:0.5rem;">Stock: ${p.stock}</span>` : ''}
           </div>
           <div class="product-row-actions">
             <button class="btn btn-outline btn-sm" onclick="editProduct('${p.id}')">Modifier</button>
@@ -395,6 +616,7 @@
       document.getElementById('prodDesc').value = product?.description || '';
       document.getElementById('prodPrice').value = product?.price || '';
       document.getElementById('prodComparePrice').value = product?.comparePrice || '';
+      document.getElementById('prodStock').value = product?.stock != null ? product.stock : '';
       document.getElementById('prodImages').value = (product?.images || []).join('\n');
       document.getElementById('prodFeatures').value = (product?.features || []).join('\n');
       document.getElementById('prodPublished').checked = product?.published || false;
@@ -430,6 +652,7 @@
         name: document.getElementById('prodName').value.trim(),
         description: document.getElementById('prodDesc').value.trim(),
         price: parseFloat(document.getElementById('prodPrice').value) || 0,
+        stock: document.getElementById('prodStock').value !== '' ? parseInt(document.getElementById('prodStock').value) : null,
         comparePrice: parseFloat(document.getElementById('prodComparePrice').value) || 0,
         images: document.getElementById('prodImages').value.split('\n').map(s => s.trim()).filter(Boolean),
         features: document.getElementById('prodFeatures').value.split('\n').map(s => s.trim()).filter(Boolean),
@@ -449,6 +672,7 @@
         renderProducts();
         closeProductModal();
         Utils.toast('Produit sauvegardé', 'success');
+        updateOnboarding();
       } catch(e) { Utils.toast('Erreur: ' + e.message, 'error'); }
       btn.disabled = false;
       btn.textContent = 'Sauvegarder';
@@ -578,17 +802,170 @@
     document.getElementById('settingsForm').addEventListener('submit', async (e) => {
       e.preventDefault();
       try {
-        await API.updateStore(storeId, {
+        const selectedTheme = document.querySelector('input[name="storeTheme"]:checked')?.value || 'classic';
+        const updates = {
           name: document.getElementById('settingName').value.trim(),
           description: document.getElementById('settingDesc').value.trim(),
           primaryColor: document.getElementById('settingColor').value,
+          theme: selectedTheme,
           stripePublishableKey: document.getElementById('settingStripePK').value.trim(),
           stripeSecretKey: document.getElementById('settingStripeSK').value.trim()
-        });
-        document.getElementById('storeName').textContent = document.getElementById('settingName').value.trim();
+        };
+        await API.updateStore(storeId, updates);
+        currentStore = { ...currentStore, ...updates };
+        document.getElementById('storeName').textContent = updates.name;
+        document.getElementById('storeBannerName').textContent = updates.name;
         Utils.toast('Paramètres sauvegardés', 'success');
+        updateOnboarding();
       } catch(e) { Utils.toast('Erreur: ' + e.message, 'error'); }
     });
+
+    // ─── Promo Codes ───
+    let currentPromos = [];
+
+    function showPromoModal() {
+      document.getElementById('promoCode').value = '';
+      document.getElementById('promoType').value = 'percent';
+      document.getElementById('promoValue').value = '';
+      document.getElementById('promoMaxUse').value = '';
+      document.getElementById('promoExpiry').value = '';
+      document.getElementById('promoActive').checked = true;
+      document.getElementById('promoModal').classList.add('active');
+    }
+
+    function closePromoModal() {
+      document.getElementById('promoModal').classList.remove('active');
+    }
+
+    async function loadPromos() {
+      currentPromos = await DB.getPromoCodes(storeId);
+      if (currentPromos.length === 0) {
+        document.getElementById('noPromos').style.display = '';
+        document.getElementById('promosList').innerHTML = '';
+        return;
+      }
+      document.getElementById('noPromos').style.display = 'none';
+      document.getElementById('promosList').innerHTML = currentPromos.map(p => `
+        <div class="product-row">
+          <div class="product-row-info" style="flex:1;">
+            <strong style="font-family:monospace; font-size:1.1rem; letter-spacing:1px;">${Utils.escapeHtml(p.code)}</strong>
+            <span>${p.type === 'percent' ? p.value + '% de réduction' : Utils.formatPrice(p.value) + ' de réduction'}</span>
+          </div>
+          <div class="product-row-status">
+            <span class="badge badge-outline">Utilisé ${p.usageCount || 0}x${p.maxUse ? '/' + p.maxUse : ''}</span>
+            <span class="badge ${p.active ? 'badge-success' : 'badge-outline'}" style="margin-left:0.5rem;">${p.active ? 'Actif' : 'Inactif'}</span>
+          </div>
+          <div class="product-row-actions">
+            <button class="btn btn-outline btn-sm" onclick="togglePromo('${p.id}', ${!p.active})">${p.active ? 'Désactiver' : 'Activer'}</button>
+            <button class="btn btn-danger btn-sm" onclick="removePromo('${p.id}')">Supprimer</button>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    document.getElementById('promoForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const data = {
+        code: document.getElementById('promoCode').value.trim().toUpperCase(),
+        type: document.getElementById('promoType').value,
+        value: parseFloat(document.getElementById('promoValue').value) || 0,
+        maxUse: parseInt(document.getElementById('promoMaxUse').value) || null,
+        expiresAt: document.getElementById('promoExpiry').value || null,
+        active: document.getElementById('promoActive').checked
+      };
+      if (!data.code || !data.value) { Utils.toast('Code et valeur requis', 'error'); return; }
+      try {
+        await DB.createPromoCode(storeId, data);
+        closePromoModal();
+        await loadPromos();
+        Utils.toast('Code promo créé', 'success');
+      } catch(e) { Utils.toast('Erreur: ' + e.message, 'error'); }
+    });
+
+    async function togglePromo(promoId, active) {
+      try {
+        await DB.updatePromoCode(storeId, promoId, { active });
+        await loadPromos();
+        Utils.toast(active ? 'Code activé' : 'Code désactivé', 'success');
+      } catch(e) { Utils.toast('Erreur: ' + e.message, 'error'); }
+    }
+
+    async function removePromo(id) {
+      if (!confirm('Supprimer ce code promo ?')) return;
+      try {
+        await DB.deletePromoCode(storeId, id);
+        await loadPromos();
+        Utils.toast('Code supprimé', 'success');
+      } catch(e) { Utils.toast('Erreur: ' + e.message, 'error'); }
+    }
+
+    // ─── CSV Export ───
+    async function exportOrdersCSV() {
+      const orders = await DB.getOrders(storeId, 5000);
+      if (orders.length === 0) { Utils.toast('Aucune commande à exporter', 'error'); return; }
+
+      const headers = ['Date', 'Email client', 'Montant', 'Devise', 'Statut', 'Type'];
+      const rows = orders.map(o => {
+        const date = o.createdAt?.toDate ? o.createdAt.toDate().toISOString() : '';
+        return [date, o.customerEmail || '', o.amount || 0, o.currency || 'EUR', o.status || 'pending', o.type || ''];
+      });
+
+      let csv = headers.join(';') + '\n';
+      rows.forEach(r => { csv += r.map(v => '"' + String(v).replace(/"/g, '""') + '"').join(';') + '\n'; });
+
+      const blob = new Blob(['\uFEFF' + csv], { type: 'text/csv;charset=utf-8;' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `commandes_${currentStore.slug}_${new Date().toISOString().split('T')[0]}.csv`;
+      a.click();
+      URL.revokeObjectURL(url);
+      Utils.toast('Export CSV téléchargé', 'success');
+    }
+
+    // ─── Analytics ───
+    async function loadAnalytics() {
+      try {
+        const analytics = await DB.getAnalytics(storeId, 30);
+        const orders = await DB.getOrders(storeId, 1000);
+        const thirtyDaysAgo = new Date();
+        thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+
+        const totalViews = analytics.reduce((acc, a) => acc + (a.views || 0), 0);
+        const recentOrders = orders.filter(o => {
+          const d = o.createdAt?.toDate?.() || new Date(o.createdAt);
+          return d >= thirtyDaysAgo;
+        });
+
+        document.getElementById('analyticsViews').textContent = totalViews;
+        document.getElementById('analyticsOrders').textContent = recentOrders.length;
+        const conversion = totalViews > 0 ? ((recentOrders.length / totalViews) * 100).toFixed(1) : '0';
+        document.getElementById('analyticsConversion').textContent = conversion + '%';
+
+        // Build chart for last 14 days
+        const dayLabels = [];
+        const viewsByDay = {};
+        for (let i = 13; i >= 0; i--) {
+          const d = new Date();
+          d.setDate(d.getDate() - i);
+          const key = d.toISOString().split('T')[0];
+          dayLabels.push(key);
+          viewsByDay[key] = 0;
+        }
+        analytics.forEach(a => { if (viewsByDay[a.date] !== undefined) viewsByDay[a.date] = a.views || 0; });
+
+        const vals = dayLabels.map(k => viewsByDay[k]);
+        const maxV = Math.max(...vals, 1);
+        document.getElementById('analyticsChartBars').innerHTML = vals.map(v => {
+          const pct = Math.max((v / maxV) * 100, 4);
+          return `<div class="chart-bar-wrap"><div class="chart-bar-value">${v > 0 ? v : ''}</div><div class="chart-bar" style="height:${pct}%"></div></div>`;
+        }).join('');
+        document.getElementById('analyticsChartLabels').innerHTML = dayLabels.map(k => {
+          const d = new Date(k + 'T00:00:00');
+          return `<span>${d.getDate()}/${d.getMonth()+1}</span>`;
+        }).join('');
+      } catch(e) { console.error('Analytics error:', e); }
+    }
 
     async function deleteStore() {
       if (!confirm('Supprimer cette boutique et tous ses produits ? Cette action est irréversible.')) return;
@@ -606,8 +983,49 @@
         currentStore.published = newState;
         document.getElementById('publishBtn').textContent = newState ? 'Dépublier' : 'Publier';
         document.getElementById('publishBtn').className = newState ? 'btn btn-outline btn-sm' : 'btn btn-primary btn-sm';
+        document.getElementById('storeBannerStatus').textContent = newState ? 'En ligne' : 'Brouillon';
+        document.getElementById('storeBannerStatus').className = 'badge ' + (newState ? 'badge-success' : 'badge-outline');
+        // Update live link visibility
+        if (newState) {
+          document.getElementById('liveLink').href = 'https://' + currentStore.slug + '.' + ROOT_DOMAIN;
+          document.getElementById('liveLink').style.display = '';
+        } else {
+          document.getElementById('liveLink').style.display = 'none';
+        }
         Utils.toast(newState ? 'Boutique publiée !' : 'Boutique dépubliée', 'success');
+        updateOnboarding();
       } catch(e) { Utils.toast('Erreur: ' + e.message, 'error'); }
+    }
+
+    // ─── Onboarding Checklist ───
+    function updateOnboarding() {
+      const isNew = new URLSearchParams(window.location.search).get('new') === '1';
+      const dismissed = localStorage.getItem('ob_dismissed_' + storeId);
+      if (dismissed && !isNew) return;
+
+      const hasStripe = !!(currentStore.stripePublishableKey && currentStore.stripeSecretKey);
+      const hasProducts = currentProducts.length > 0;
+      const isPublished = currentStore.published;
+
+      if (hasStripe && hasProducts && isPublished) {
+        document.getElementById('onboarding').style.display = 'none';
+        return;
+      }
+
+      document.getElementById('onboarding').style.display = '';
+
+      let done = 1;
+      if (hasStripe) { done++; document.getElementById('obStep2').classList.add('completed'); }
+      if (hasProducts) { done++; document.getElementById('obStep3').classList.add('completed'); }
+      if (isPublished) { done++; document.getElementById('obStep4').classList.add('completed'); }
+
+      document.getElementById('onboardingProgress').textContent = done + '/4';
+      document.getElementById('onboardingBar').style.width = (done * 25) + '%';
+    }
+
+    function dismissOnboarding() {
+      localStorage.setItem('ob_dismissed_' + storeId, '1');
+      document.getElementById('onboarding').style.display = 'none';
     }
 
     // ─── INIT ───
@@ -630,7 +1048,14 @@
 
       // Header
       document.getElementById('storeName').textContent = currentStore.name;
-      document.getElementById('previewLink').href = 'https://' + currentStore.slug + '.' + ROOT_DOMAIN;
+      // Preview link always works (even unpublished) — uses ?preview=storeId token
+      const storeUrl = 'https://' + currentStore.slug + '.' + ROOT_DOMAIN;
+      document.getElementById('previewLink').href = storeUrl + '?preview=' + storeId;
+      // Live link only shown when published
+      if (currentStore.published) {
+        document.getElementById('liveLink').href = storeUrl;
+        document.getElementById('liveLink').style.display = '';
+      }
       document.getElementById('publishBtn').textContent = currentStore.published ? 'Dépublier' : 'Publier';
       document.getElementById('publishBtn').className = currentStore.published ? 'btn btn-outline btn-sm' : 'btn btn-primary btn-sm';
 
@@ -651,11 +1076,23 @@
       document.getElementById('settingStripePK').value = currentStore.stripePublishableKey || '';
       document.getElementById('settingStripeSK').value = currentStore.stripeSecretKey ? '••••••••' : '';
 
+      // Theme radio
+      const themeVal = currentStore.theme || 'classic';
+      const themeRadio = document.querySelector(`input[name="storeTheme"][value="${themeVal}"]`);
+      if (themeRadio) themeRadio.checked = true;
+
       // Show UI
       document.getElementById('loader').style.display = 'none';
       document.getElementById('storeBanner').style.display = '';
       document.getElementById('tabs').style.display = '';
       document.getElementById('tab-products').style.display = '';
+
+      // Show onboarding checklist
+      updateOnboarding();
+
+      // Load promos and analytics in background
+      loadPromos();
+      loadAnalytics();
     });
   </script>
 </body>

@@ -27,7 +27,9 @@
       <header class="topbar">
         <button class="mobile-sidebar-toggle" id="sidebarToggle"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="18" x2="21" y2="18"/></svg></button>
         <h1 class="topbar-title">Nouvelle boutique</h1>
-        <div class="topbar-right"></div>
+        <div class="topbar-right">
+          <a href="/app/stores.html" class="btn btn-outline btn-sm">← Retour</a>
+        </div>
       </header>
 
       <div class="dashboard-content">
@@ -42,16 +44,21 @@
               <div class="wizard-step-line"></div>
               <div class="wizard-step" data-step="2">
                 <div class="wizard-step-circle">2</div>
-                <span>Configuration</span>
+                <span>Design</span>
               </div>
               <div class="wizard-step-line"></div>
               <div class="wizard-step" data-step="3">
                 <div class="wizard-step-circle">3</div>
+                <span>Paiement</span>
+              </div>
+              <div class="wizard-step-line"></div>
+              <div class="wizard-step" data-step="4">
+                <div class="wizard-step-circle">4</div>
                 <span>Lancement</span>
               </div>
             </div>
 
-            <!-- STEP 1: IDENTITY -->
+            <!-- STEP 1: IDENTITY ───────────── -->
             <div class="wizard-panel active" id="step1">
               <div class="wizard-panel-header">
                 <span class="wizard-emoji">🏪</span>
@@ -79,12 +86,12 @@
               </button>
             </div>
 
-            <!-- STEP 2: CONFIG -->
+            <!-- STEP 2: DESIGN ─────────────── -->
             <div class="wizard-panel" id="step2">
               <div class="wizard-panel-header">
-                <span class="wizard-emoji">⚙️</span>
-                <h2>Personnalise ta boutique</h2>
-                <p class="text-muted">Quelques détails pour bien démarrer.</p>
+                <span class="wizard-emoji">🎨</span>
+                <h2>Personnalise le look</h2>
+                <p class="text-muted">Choisis la couleur et ajoute une description.</p>
               </div>
 
               <div class="form-group" style="margin-bottom:1.5rem;">
@@ -110,6 +117,22 @@
                 </div>
               </div>
 
+              <!-- Live preview -->
+              <div class="wizard-preview" id="livePreview">
+                <div class="wizard-preview-label">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+                  Aperçu
+                </div>
+                <div class="wizard-preview-card" id="previewCard">
+                  <div class="wizard-preview-icon" id="previewIcon" style="background:#6C5CE7;">B</div>
+                  <div class="wizard-preview-text">
+                    <strong id="previewName">Ma boutique</strong>
+                    <span id="previewUrl">ma-boutique.scalevo.shop</span>
+                  </div>
+                  <span class="badge badge-outline" style="font-size:0.6875rem;">Brouillon</span>
+                </div>
+              </div>
+
               <div class="wizard-btn-row">
                 <button type="button" class="btn btn-outline btn-lg" onclick="goToStep(1)">
                   <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
@@ -122,8 +145,58 @@
               </div>
             </div>
 
-            <!-- STEP 3: LAUNCH -->
+            <!-- STEP 3: STRIPE ─────────────── -->
             <div class="wizard-panel" id="step3">
+              <div class="wizard-panel-header">
+                <span class="wizard-emoji">💳</span>
+                <h2>Connecte Stripe</h2>
+                <p class="text-muted">Pour recevoir les paiements de tes clients. Tu peux aussi le faire plus tard.</p>
+              </div>
+
+              <div class="wizard-stripe-info">
+                <div class="wizard-stripe-icon">
+                  <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="var(--brand)" stroke-width="2"><rect x="1" y="4" width="22" height="16" rx="2" ry="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg>
+                </div>
+                <div>
+                  <strong>Pourquoi Stripe ?</strong>
+                  <p class="text-muted text-sm" style="margin:4px 0 0;">Stripe est le leader mondial du paiement en ligne. Tes clients paient en toute sécurité, tu reçois l'argent directement sur ton compte bancaire.</p>
+                </div>
+              </div>
+
+              <div class="form-group" style="margin-bottom:1.25rem;">
+                <label class="form-label">Clé publique <code style="font-size:0.75rem;">pk_live_...</code></label>
+                <input type="text" id="stripePK" class="input" placeholder="pk_live_xxx ou pk_test_xxx">
+              </div>
+
+              <div class="form-group" style="margin-bottom:1.25rem;">
+                <label class="form-label">Clé secrète <code style="font-size:0.75rem;">sk_live_...</code></label>
+                <input type="password" id="stripeSK" class="input" placeholder="sk_live_xxx ou sk_test_xxx">
+                <small class="text-muted">Stockée de manière sécurisée, jamais exposée côté client.</small>
+              </div>
+
+              <div class="stripe-info-box" style="margin-bottom:1.5rem;">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--brand)" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
+                <span>Trouve tes clés sur <a href="https://dashboard.stripe.com/apikeys" target="_blank" style="color:var(--brand);text-decoration:underline;">dashboard.stripe.com/apikeys</a></span>
+              </div>
+
+              <div class="wizard-skip-row">
+                <button type="button" class="btn btn-ghost" onclick="goToStep(4)">Passer cette étape →</button>
+              </div>
+
+              <div class="wizard-btn-row">
+                <button type="button" class="btn btn-outline btn-lg" onclick="goToStep(2)">
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+                  Retour
+                </button>
+                <button type="button" class="btn btn-primary btn-lg wizard-next-btn" onclick="goToStep(4)">
+                  Continuer
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+                </button>
+              </div>
+            </div>
+
+            <!-- STEP 4: LAUNCH ─────────────── -->
+            <div class="wizard-panel" id="step4">
               <div class="wizard-panel-header">
                 <span class="wizard-emoji">🚀</span>
                 <h2>Prêt à lancer !</h2>
@@ -132,21 +205,73 @@
 
               <div class="recap-card">
                 <div class="recap-row">
-                  <span class="recap-label">Nom</span>
+                  <span class="recap-label">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/></svg>
+                    Nom
+                  </span>
                   <span class="recap-value" id="recapName">—</span>
                 </div>
                 <div class="recap-row">
-                  <span class="recap-label">URL</span>
+                  <span class="recap-label">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10 13a5 5 0 007.54.54l3-3a5 5 0 00-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 00-7.54-.54l-3 3a5 5 0 007.07 7.07l1.71-1.71"/></svg>
+                    URL
+                  </span>
                   <span class="recap-value recap-url" id="recapUrl">—</span>
                 </div>
                 <div class="recap-row">
-                  <span class="recap-label">Devise</span>
+                  <span class="recap-label">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+                    Devise
+                  </span>
                   <span class="recap-value" id="recapCurrency">—</span>
+                </div>
+                <div class="recap-row">
+                  <span class="recap-label">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="1" y="4" width="22" height="16" rx="2" ry="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg>
+                    Stripe
+                  </span>
+                  <span class="recap-value" id="recapStripe">—</span>
+                </div>
+                <div class="recap-row">
+                  <span class="recap-label">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M12 3v3M12 18v3M4.22 4.22l2.12 2.12M17.66 17.66l2.12 2.12M3 12h3M18 12h3M4.22 19.78l2.12-2.12M17.66 6.34l2.12-2.12"/></svg>
+                    Couleur
+                  </span>
+                  <span class="recap-value" id="recapColor">
+                    <span class="recap-color-dot" id="recapColorDot"></span>
+                    <span id="recapColorHex">#6C5CE7</span>
+                  </span>
+                </div>
+              </div>
+
+              <!-- Next steps preview -->
+              <div class="wizard-next-steps">
+                <h4>Prochaines étapes après la création :</h4>
+                <div class="wizard-next-step">
+                  <span class="wizard-next-step-num">1</span>
+                  <div>
+                    <strong>Ajouter ton produit</strong>
+                    <p>Nom, prix, images et description</p>
+                  </div>
+                </div>
+                <div class="wizard-next-step">
+                  <span class="wizard-next-step-num">2</span>
+                  <div>
+                    <strong>Configurer ton funnel</strong>
+                    <p>Bundles, order bump, upsell post-achat</p>
+                  </div>
+                </div>
+                <div class="wizard-next-step">
+                  <span class="wizard-next-step-num">3</span>
+                  <div>
+                    <strong>Publier ta boutique</strong>
+                    <p>Un clic et tu es en ligne !</p>
+                  </div>
                 </div>
               </div>
 
               <div class="wizard-btn-row">
-                <button type="button" class="btn btn-outline btn-lg" onclick="goToStep(2)">
+                <button type="button" class="btn btn-outline btn-lg" onclick="goToStep(3)">
                   <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
                   Retour
                 </button>
@@ -188,18 +313,44 @@
     // Color picker preview
     document.getElementById('storeColor').addEventListener('input', (e) => {
       document.getElementById('colorLabel').textContent = e.target.value;
+      document.getElementById('previewIcon').style.background = e.target.value;
     });
+
+    // ── Live preview update ──
+    function updatePreview() {
+      const name = document.getElementById('storeName').value.trim() || 'Ma boutique';
+      const slug = document.getElementById('storeSlug').value.trim() || 'ma-boutique';
+      const color = document.getElementById('storeColor').value;
+      document.getElementById('previewName').textContent = name;
+      document.getElementById('previewUrl').textContent = slug + '.scalevo.shop';
+      document.getElementById('previewIcon').textContent = name.charAt(0).toUpperCase();
+      document.getElementById('previewIcon').style.background = color;
+    }
 
     // ── Wizard navigation ──
     function goToStep(step) {
       if (step === 2 && !slugValid) return;
 
-      // Update recap on step 3
-      if (step === 3) {
+      // Update preview
+      if (step === 2) updatePreview();
+
+      // Update recap on step 4
+      if (step === 4) {
         document.getElementById('recapName').textContent = document.getElementById('storeName').value.trim() || '—';
         document.getElementById('recapUrl').textContent = (document.getElementById('storeSlug').value.trim() || '—') + '.scalevo.shop';
         const currencyMap = { EUR: '🇪🇺 EUR (€)', USD: '🇺🇸 USD ($)', GBP: '🇬🇧 GBP (£)' };
         document.getElementById('recapCurrency').textContent = currencyMap[document.getElementById('storeCurrency').value] || 'EUR';
+
+        const stripePK = document.getElementById('stripePK').value.trim();
+        if (stripePK) {
+          document.getElementById('recapStripe').innerHTML = '<span style="color:var(--success);">✓ Connecté</span>';
+        } else {
+          document.getElementById('recapStripe').innerHTML = '<span style="color:var(--warning, #f59e0b);">⚠ Non configuré</span>';
+        }
+
+        const color = document.getElementById('storeColor').value;
+        document.getElementById('recapColorDot').style.background = color;
+        document.getElementById('recapColorHex').textContent = color;
       }
 
       // Animate out current, animate in next
@@ -217,6 +368,7 @@
       });
 
       currentStep = step;
+      window.scrollTo({ top: 0, behavior: 'smooth' });
     }
 
     // Auto-generate slug from name
@@ -279,10 +431,12 @@
           slug: document.getElementById('storeSlug').value.trim(),
           description: document.getElementById('storeDesc').value.trim(),
           currency: document.getElementById('storeCurrency').value,
-          primaryColor: document.getElementById('storeColor').value
+          primaryColor: document.getElementById('storeColor').value,
+          stripePublishableKey: document.getElementById('stripePK').value.trim(),
+          stripeSecretKey: document.getElementById('stripeSK').value.trim()
         });
-        Utils.toast('Boutique créée !', 'success');
-        window.location.href = '/app/store.html?id=' + result.storeId;
+        Utils.toast('Boutique créée ! 🎉', 'success');
+        window.location.href = '/app/store.html?id=' + result.storeId + '&new=1';
       } catch (err) {
         Utils.toast('Erreur: ' + err.message, 'error');
         btn.disabled = false;

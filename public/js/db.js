@@ -150,6 +150,58 @@ const DB = {
     return { id: doc.id, ...doc.data() };
   },
 
+  /* ─── PROMO CODES ─── */
+  async getPromoCodes(storeId) {
+    const snap = await db.collection('stores').doc(storeId)
+      .collection('promoCodes')
+      .orderBy('createdAt', 'desc')
+      .get();
+    return snap.docs.map(d => ({ id: d.id, ...d.data() }));
+  },
+
+  async createPromoCode(storeId, data) {
+    const ref = await db.collection('stores').doc(storeId)
+      .collection('promoCodes').add({
+        ...data,
+        usageCount: 0,
+        createdAt: firebase.firestore.FieldValue.serverTimestamp()
+      });
+    return ref.id;
+  },
+
+  async updatePromoCode(storeId, promoId, data) {
+    await db.collection('stores').doc(storeId)
+      .collection('promoCodes').doc(promoId).update(data);
+  },
+
+  async deletePromoCode(storeId, promoId) {
+    await db.collection('stores').doc(storeId)
+      .collection('promoCodes').doc(promoId).delete();
+  },
+
+  /* ─── ANALYTICS ─── */
+  async trackView(storeId) {
+    const today = new Date().toISOString().split('T')[0];
+    const ref = db.collection('stores').doc(storeId)
+      .collection('analytics').doc(today);
+    await ref.set({
+      views: firebase.firestore.FieldValue.increment(1),
+      date: today
+    }, { merge: true });
+  },
+
+  async getAnalytics(storeId, days = 30) {
+    const startDate = new Date();
+    startDate.setDate(startDate.getDate() - days);
+    const startStr = startDate.toISOString().split('T')[0];
+    const snap = await db.collection('stores').doc(storeId)
+      .collection('analytics')
+      .where('date', '>=', startStr)
+      .orderBy('date', 'desc')
+      .get();
+    return snap.docs.map(d => ({ id: d.id, ...d.data() }));
+  },
+
   /* ─── SLUGS ─── */
   async isSlugAvailable(slug) {
     const doc = await db.collection('slugs').doc(slug).get();

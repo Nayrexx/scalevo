@@ -12,6 +12,15 @@
 </head>
 <body class="storefront">
 
+  <!-- PREVIEW BANNER ───────────────────────── -->
+  <div class="sf-preview-banner" id="previewBanner" style="display:none;">
+    <div class="sf-preview-banner-inner">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+      <span>MODE PREVIEW — Cette boutique n'est pas encore publiée</span>
+      <a id="previewBackLink" href="#" class="sf-preview-back">← Retour au dashboard</a>
+    </div>
+  </div>
+
   <!-- ANNOUNCEMENT BAR ─────────────────────── -->
   <div class="sf-announcement" id="countdownBar" style="display:none;">
     <div class="sf-announcement-inner">
@@ -109,6 +118,21 @@
                 </div>
                 <span class="sf-bump-price" id="bumpPriceDisplay"></span>
               </label>
+            </div>
+
+            <!-- Promo Code Input -->
+            <div class="sf-promo" id="promoSection">
+              <div class="sf-promo-input-row">
+                <input type="text" id="promoInput" class="sf-promo-input" placeholder="Code promo" style="text-transform:uppercase;">
+                <button type="button" class="sf-promo-btn" id="promoApplyBtn" onclick="applyPromoCode()">Appliquer</button>
+              </div>
+              <div class="sf-promo-msg" id="promoMsg" style="display:none;"></div>
+            </div>
+
+            <!-- Stock badge -->
+            <div class="sf-stock-badge" id="stockBadge" style="display:none;">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+              <span id="stockText"></span>
             </div>
 
             <!-- CTA -->
@@ -346,6 +370,7 @@
   <script src="https://js.stripe.com/v3/"></script>
   <script src="/js/firebase-config.js"></script>
   <script src="/js/utils.js"></script>
+  <script src="/js/db.js"></script>
   <script src="/js/store-resolver.js"></script>
   <script>
     let storeData = null;
@@ -355,6 +380,8 @@
     let bumpSelected = false;
     let currentImgIndex = 0;
     let allImages = [];
+    let appliedPromo = null;
+    let isPreviewMode = false;
 
     function toggleFaq(btn) {
       const item = btn.parentElement;
@@ -387,13 +414,94 @@
       if (selectedBundle) basePrice = selectedBundle.unitPrice * selectedBundle.qty;
       let total = basePrice;
       if (bumpSelected && funnelData?.orderBump?.price) total += funnelData.orderBump.price;
+
+      // Apply promo discount
+      if (appliedPromo) {
+        if (appliedPromo.type === 'percent') {
+          total = total * (1 - appliedPromo.value / 100);
+        } else {
+          total = Math.max(0, total - appliedPromo.value);
+        }
+      }
+
       const label = Utils.formatPrice(total);
       document.getElementById('priceDisplay').textContent = label;
       document.getElementById('stickyPrice').textContent = label;
       document.getElementById('ctaPrice').textContent = label;
     }
 
+    async function applyPromoCode() {
+      const code = document.getElementById('promoInput').value.trim().toUpperCase();
+      const msgEl = document.getElementById('promoMsg');
+      if (!code) return;
+
+      try {
+        // Check promo codes from Firestore
+        const snap = await db.collection('stores').doc(storeData.id)
+          .collection('promoCodes')
+          .where('code', '==', code)
+          .where('active', '==', true)
+          .limit(1)
+          .get();
+
+        if (snap.empty) {
+          msgEl.textContent = '❌ Code invalide ou expiré';
+          msgEl.className = 'sf-promo-msg sf-promo-error';
+          msgEl.style.display = '';
+          appliedPromo = null;
+          updatePrice();
+          return;
+        }
+
+        const promo = snap.docs[0].data();
+
+        // Check expiry
+        if (promo.expiresAt && new Date(promo.expiresAt) < new Date()) {
+          msgEl.textContent = '❌ Ce code a expiré';
+          msgEl.className = 'sf-promo-msg sf-promo-error';
+          msgEl.style.display = '';
+          appliedPromo = null;
+          updatePrice();
+          return;
+        }
+
+        // Check max usage
+        if (promo.maxUse && promo.usageCount >= promo.maxUse) {
+          msgEl.textContent = '❌ Ce code a atteint son nombre max d\'utilisations';
+          msgEl.className = 'sf-promo-msg sf-promo-error';
+          msgEl.style.display = '';
+          appliedPromo = null;
+          updatePrice();
+          return;
+        }
+
+        appliedPromo = { ...promo, id: snap.docs[0].id };
+        const desc = promo.type === 'percent' ? `-${promo.value}%` : `-${Utils.formatPrice(promo.value)}`;
+        msgEl.textContent = `✅ Code appliqué : ${desc}`;
+        msgEl.className = 'sf-promo-msg sf-promo-success';
+        msgEl.style.display = '';
+        document.getElementById('promoApplyBtn').textContent = '✓';
+        updatePrice();
+      } catch(e) {
+        msgEl.textContent = '❌ Erreur lors de la vérification';
+        msgEl.className = 'sf-promo-msg sf-promo-error';
+        msgEl.style.display = '';
+      }
+    }
+
     async function startCheckout() {
+      // Block checkout in preview mode
+      if (isPreviewMode) {
+        alert('Mode prévisualisation — le paiement est désactivé.');
+        return;
+      }
+
+      // Check stock before checkout
+      if (productData.stock != null && productData.stock <= 0) {
+        alert('Ce produit est en rupture de stock.');
+        return;
+      }
+
       const btn = document.getElementById('ctaBtn');
       btn.disabled = true;
       btn.innerHTML = '<span class="sf-cta-spinner"></span> Redirection...';
@@ -403,6 +511,7 @@
           productId: productData.id,
           bundleIndex: selectedBundle ? funnelData.bundles.indexOf(selectedBundle) : null,
           includeOrderBump: bumpSelected,
+          promoCode: appliedPromo ? appliedPromo.code : null,
           successUrl: window.location.origin + '/success.html?store=' + storeData.id,
           cancelUrl: window.location.href
         };
@@ -437,7 +546,9 @@
 
     async function init() {
       const slug = StoreResolver.getSlug();
-      const urlSlug = slug || new URLSearchParams(window.location.search).get('slug');
+      const params = new URLSearchParams(window.location.search);
+      const urlSlug = slug || params.get('slug');
+      const previewToken = params.get('preview');
 
       if (!urlSlug) {
         document.getElementById('loader').style.display = 'none';
@@ -453,13 +564,25 @@
       }
 
       storeData = await StoreResolver.loadStore(storeId);
-      if (!storeData || !storeData.published) {
+
+      // Preview mode: allow viewing unpublished stores if token matches storeId
+      if (previewToken && previewToken === storeId) {
+        isPreviewMode = true;
+      }
+
+      if (!storeData || (!storeData.published && !isPreviewMode)) {
         document.getElementById('loader').style.display = 'none';
         document.getElementById('notFound').style.display = '';
         return;
       }
 
-      productData = await StoreResolver.loadProduct(storeId);
+      // Show preview banner if in preview mode
+      if (isPreviewMode && !storeData.published) {
+        document.getElementById('previewBanner').style.display = '';
+        document.getElementById('previewBackLink').href = '/app/store.html?id=' + storeId;
+      }
+
+      productData = await StoreResolver.loadProduct(storeId, isPreviewMode);
       if (!productData) {
         document.getElementById('loader').style.display = 'none';
         document.getElementById('notFound').style.display = '';
@@ -471,6 +594,11 @@
       // Theme color
       if (storeData.primaryColor) {
         document.documentElement.style.setProperty('--sf-primary', storeData.primaryColor);
+      }
+
+      // Theme class
+      if (storeData.theme && storeData.theme !== 'classic') {
+        document.body.classList.add('sf-theme-' + storeData.theme);
       }
 
       // Header
@@ -564,6 +692,26 @@
 
       // Countdown
       if (funnelData?.countdownMinutes) startCountdown(funnelData.countdownMinutes);
+
+      // Stock display
+      if (productData.stock != null) {
+        const stockBadge = document.getElementById('stockBadge');
+        stockBadge.style.display = '';
+        if (productData.stock <= 0) {
+          document.getElementById('stockText').textContent = '🔴 Rupture de stock';
+          document.getElementById('ctaBtn').disabled = true;
+          document.getElementById('ctaBtn').textContent = 'Rupture de stock';
+        } else if (productData.stock <= 10) {
+          document.getElementById('stockText').textContent = `🔥 Plus que ${productData.stock} en stock !`;
+        } else {
+          document.getElementById('stockText').textContent = `✅ En stock (${productData.stock} disponibles)`;
+        }
+      }
+
+      // Track view (analytics) — skip in preview mode
+      if (!isPreviewMode) {
+        try { await DB.trackView(storeData.id); } catch(e) {}
+      }
 
       // Show
       document.getElementById('loader').style.display = 'none';

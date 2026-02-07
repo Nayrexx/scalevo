@@ -7,7 +7,7 @@ exports.handler = async (event) => {
 
   try {
     const user = await verifyAuth(event);
-    const { name, slug, description, currency } = JSON.parse(event.body);
+    const { name, slug, description, currency, primaryColor, stripePublishableKey, stripeSecretKey } = JSON.parse(event.body);
 
     if (!name || !slug) return fail(400, 'Nom et slug requis');
 
@@ -18,8 +18,8 @@ exports.handler = async (event) => {
     // Check plan limits
     const subDoc = await db.collection('subscriptions').doc(user.uid).get();
     const plan = subDoc.data()?.plan || 'free';
-    const limits = { free: 1, starter: 3, pro: 10, scale: 50 };
-    const maxStores = limits[plan] || 1;
+    const limits = { free: 0, starter: 1, pro: 3, scale: 999 };
+    const maxStores = limits[plan] || 0;
 
     const storesSnap = await db.collection('stores').where('ownerId', '==', user.uid).get();
     if (storesSnap.size >= maxStores) {
@@ -36,9 +36,9 @@ exports.handler = async (event) => {
       currency: currency || 'EUR',
       ownerId: user.uid,
       published: false,
-      primaryColor: '#6C5CE7',
-      stripePublishableKey: '',
-      stripeSecretKey: '',
+      primaryColor: primaryColor || '#6C5CE7',
+      stripePublishableKey: stripePublishableKey || '',
+      stripeSecretKey: stripeSecretKey || '',
       productCount: 0,
       createdAt: ts,
       updatedAt: ts,

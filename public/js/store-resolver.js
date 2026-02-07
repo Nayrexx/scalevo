@@ -90,13 +90,22 @@ const StoreResolver = {
 
   /**
    * Load published product for a store (mono-product).
+   * In preview mode, loads any product regardless of published state.
    */
-  async loadProduct(storeId) {
-    const snap = await db.collection('stores').doc(storeId)
-      .collection('products')
-      .where('published', '==', true)
-      .limit(1)
-      .get();
+  async loadProduct(storeId, previewMode = false) {
+    let snap;
+    if (previewMode) {
+      snap = await db.collection('stores').doc(storeId)
+        .collection('products')
+        .limit(1)
+        .get();
+    } else {
+      snap = await db.collection('stores').doc(storeId)
+        .collection('products')
+        .where('published', '==', true)
+        .limit(1)
+        .get();
+    }
     if (snap.empty) return null;
     return { id: snap.docs[0].id, ...snap.docs[0].data() };
   },

@@ -6,7 +6,7 @@ exports.handler = async (event) => {
   if (event.httpMethod !== 'POST') return fail(405, 'Method not allowed');
 
   try {
-    const { storeId, productId, bundleIndex, includeOrderBump, successUrl, cancelUrl } = JSON.parse(event.body);
+    const { storeId, productId, bundleIndex, includeOrderBump, promoCode, successUrl, cancelUrl } = JSON.parse(event.body);
 
     const storeDoc = await db.collection('stores').doc(storeId).get();
     if (!storeDoc.exists || !storeDoc.data()?.published) {
@@ -23,6 +23,11 @@ exports.handler = async (event) => {
     const prodDoc = await db.collection('stores').doc(storeId).collection('products').doc(productId).get();
     if (!prodDoc.exists) return fail(404, 'Produit introuvable');
     const product = prodDoc.data();
+
+    // Stock check
+    if (product.stock != null && product.stock <= 0) {
+      return fail(400, 'Ce produit est en rupture de stock.');
+    }
 
     let funnel = null;
     const funnelSnap = await db.collection('stores').doc(storeId).collection('funnels').limit(1).get();
@@ -62,14 +67,59 @@ exports.handler = async (event) => {
       });
     }
 
-    const session = await stripe.checkout.sessions.create({
+    // Promo code → Stripe coupon
+    const discounts = [];
+    let promoData = null;
+    if (promoCode) {
+      const promoSnap = await db.collection('stores').doc(storeId)
+        .collection('promoCodes')
+        .where('code', '==', promoCode)
+        .where('active', '==', true)
+        .limit(1)
+        .get();
+
+      if (!promoSnap.empty) {
+        promoData = { id: promoSnap.docs[0].id, ...promoSnap.docs[0].data() };
+
+        // Validate expiry & usage
+        const valid = (!promoData.expiresAt || new Date(promoData.expiresAt) >= new Date()) &&
+                      (!promoData.maxUse || promoData.usageCount < promoData.maxUse);
+
+        if (valid) {
+          // Create a one-time Stripe coupon
+          const couponParams = promoData.type === 'percent'
+            ? { percent_off: promoData.value, duration: 'once' }
+            : { amount_off: Math.round(promoData.value * 100), currency: store.currency?.toLowerCase() || 'eur', duration: 'once' };
+
+          const coupon = await stripe.coupons.create(couponParams);
+          discounts.push({ coupon: coupon.id });
+        }
+      }
+    }
+
+    const sessionParams = {
       mode: 'payment',
       payment_method_types: ['card'],
       line_items: lineItems,
       success_url: successUrl + '&session_id={CHECKOUT_SESSION_ID}',
       cancel_url: cancelUrl,
-      metadata: { storeId, productId, storeOwnerId: store.ownerId, type: 'store_checkout' },
-    });
+      metadata: {
+        storeId, productId, storeOwnerId: store.ownerId,
+        type: 'store_checkout',
+        promoCodeId: promoData?.id || '',
+        promoCode: promoCode || ''
+      },
+      // Enable email receipt
+      payment_intent_data: {
+        receipt_email: undefined // Will be set by Stripe from the customer input
+      },
+    };
+
+    if (discounts.length > 0) {
+      sessionParams.discounts = discounts;
+    }
+
+    const session = await stripe.checkout.sessions.create(sessionParams);
 
     return ok({ sessionId: session.id });
   } catch (err) {
