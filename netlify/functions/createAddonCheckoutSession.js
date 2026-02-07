@@ -2,19 +2,22 @@ const { db, verifyAuth, preflight, ok, fail, getPlatformStripe } = require('./_u
 
 // ─── Addon definitions (price in cents) ───
 const ADDON_CONFIG = {
-  promoCodes:    { name: 'Codes Promo',          price: 499,  recurring: true  },
-  emailsAuto:   { name: 'Emails Automatiques',   price: 799,  recurring: true  },
-  analyticsPro:  { name: 'Analytics Pro',         price: 599,  recurring: true  },
-  customDomain:  { name: 'Domaine Personnalisé',  price: 299,  recurring: true  },
-  reviews:       { name: 'Avis Clients',          price: 399,  recurring: true  },
-  pixelTracking: { name: 'Pixels & Tracking',     price: 499,  recurring: true  },
-  cartRecovery:  { name: 'Relance Panier',        price: 999,  recurring: true  },
-  premiumThemes: { name: 'Thèmes Premium',        price: 1499, recurring: false },
-  liveChat:      { name: 'Chat en Direct',        price: 699,  recurring: true  },
-  seoAdvanced:   { name: 'SEO Avancé',            price: 399,  recurring: true  },
-  multiUsers:    { name: 'Multi-Utilisateurs',    price: 499,  recurring: true  },
-  orderTracking: { name: 'Suivi Commandes',       price: 399,  recurring: true  },
+  promoCodes:    { name: 'Codes Promo',          price: 299,  recurring: true  },
+  emailsAuto:   { name: 'Emails Automatiques',   price: 499,  recurring: true  },
+  analyticsPro:  { name: 'Analytics Pro',         price: 349,  recurring: true  },
+  customDomain:  { name: 'Domaine Personnalisé',  price: 199,  recurring: true  },
+  reviews:       { name: 'Avis Clients',          price: 249,  recurring: true  },
+  pixelTracking: { name: 'Pixels & Tracking',     price: 299,  recurring: true  },
+  cartRecovery:  { name: 'Relance Panier',        price: 699,  recurring: true  },
+  premiumThemes: { name: 'Thèmes Premium',        price: 999,  recurring: false },
+  liveChat:      { name: 'Chat en Direct',        price: 399,  recurring: true  },
+  seoAdvanced:   { name: 'SEO Avancé',            price: 249,  recurring: true  },
+  multiUsers:    { name: 'Multi-Utilisateurs',    price: 349,  recurring: true  },
+  orderTracking: { name: 'Suivi Commandes',       price: 249,  recurring: true  },
 };
+
+// Modules included for free in Scale plan (all of them)
+const SCALE_INCLUDED = Object.keys(ADDON_CONFIG);
 
 exports.handler = async (event) => {
   const pre = preflight(event);
@@ -26,6 +29,18 @@ exports.handler = async (event) => {
     const { addonId } = JSON.parse(event.body);
     const addon = ADDON_CONFIG[addonId];
     if (!addon) return fail(400, 'Module inconnu');
+
+    // ─── Block if module is included in user's plan ───
+    const subDoc = await db.collection('subscriptions').doc(user.uid).get();
+    const sub = subDoc.exists ? subDoc.data() : null;
+    if (sub?.plan === 'scale' && sub?.status === 'active') {
+      return fail(400, 'Ce module est déjà inclus dans ton plan Scale.');
+    }
+    // Pro plan includes certain modules
+    const PRO_INCLUDED = ['analyticsPro', 'reviews', 'pixelTracking', 'seoAdvanced', 'orderTracking'];
+    if (sub?.plan === 'pro' && sub?.status === 'active' && PRO_INCLUDED.includes(addonId)) {
+      return fail(400, 'Ce module est déjà inclus dans ton plan Pro.');
+    }
 
     const stripe = getPlatformStripe();
 

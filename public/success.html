@@ -5,41 +5,29 @@
   <link rel="icon" type="image/svg+xml" href="/favicon.svg">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Commande confirmée !</title>
-  <link rel="stylesheet" href="/css/main.css">
   <link rel="stylesheet" href="/css/storefront.css">
 </head>
 <body class="storefront">
-  <div class="sf-success-page">
+  <div class="sf-success">
     <div class="sf-success-card">
       <div class="sf-success-icon">✅</div>
       <h1>Merci pour ta commande !</h1>
-      <p class="sf-success-subtitle">Ta commande a bien été enregistrée. Tu recevras un email de confirmation sous quelques minutes.</p>
-
-      <div class="sf-success-details" id="orderDetails" style="display:none;">
-        <div class="sf-success-row">
-          <span>Numéro de commande</span>
-          <strong id="orderId">—</strong>
-        </div>
-        <div class="sf-success-row">
-          <span>Montant</span>
-          <strong id="orderAmount">—</strong>
-        </div>
-      </div>
+      <p>Ta commande a bien été enregistrée. Tu recevras un email de confirmation sous quelques minutes.</p>
 
       <!-- UPSELL SECTION -->
       <div id="upsellSection" style="display:none;">
-        <div class="sf-upsell-card">
-          <div class="sf-upsell-badge">⚡ Offre exclusive — Réservée aux acheteurs</div>
-          <h2 id="upsellTitle"></h2>
+        <div class="sf-upsell">
+          <span style="font-size:0.75rem;font-weight:700;color:#f59e0b;text-transform:uppercase;letter-spacing:0.04em;">⚡ Offre exclusive — Réservée aux acheteurs</span>
+          <h3 id="upsellTitle"></h3>
           <p id="upsellDesc"></p>
-          <div class="sf-upsell-price" id="upsellPrice"></div>
-          <button class="sf-cta-btn" onclick="acceptUpsell()" id="upsellBtn">Oui, j'en profite !</button>
-          <button class="btn btn-outline" style="width:100%; margin-top:0.75rem;" onclick="declineUpsell()">Non merci</button>
+          <div style="font-size:1.25rem;font-weight:800;color:var(--sf-primary);margin-bottom:12px;" id="upsellPrice"></div>
+          <button class="sf-cta" onclick="acceptUpsell()" id="upsellBtn" style="font-size:0.9375rem;">Oui, j'en profite !</button>
+          <button class="sf-btn" style="width:100%;margin-top:0.75rem;text-align:center;background:transparent;color:var(--sf-text-soft);border:1px solid var(--sf-border);" onclick="declineUpsell()">Non merci</button>
         </div>
       </div>
 
       <div id="finalMessage" style="display:none;">
-        <p style="color:var(--text-secondary); margin-top:1.5rem;">Tu peux fermer cette page. Bonne journée ! 🎉</p>
+        <p style="color:var(--sf-text-soft); margin-top:1.5rem;">Tu peux fermer cette page. Bonne journée ! 🎉</p>
       </div>
     </div>
   </div>
@@ -85,7 +73,7 @@
       btn.textContent = 'Traitement...';
 
       try {
-        const res = await fetch('/api/createUpsellCheckoutSession', {
+        const res = await fetch('/.netlify/functions/createUpsellCheckoutSession', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({

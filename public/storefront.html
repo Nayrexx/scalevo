@@ -6,78 +6,169 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title id="pageTitle">Boutique</title>
   <meta name="description" id="pageMeta" content="">
-  <link rel="stylesheet" href="/css/main.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="/css/storefront.css">
 </head>
 <body class="storefront">
-  <!-- COUNTDOWN BAR ────────────────────────── -->
-  <div class="countdown-bar" id="countdownBar" style="display:none;">
-    <span>🔥 Offre spéciale expire dans <strong id="countdownTimer">15:00</strong></span>
+
+  <!-- ANNOUNCEMENT BAR ─────────────────────── -->
+  <div class="sf-announcement" id="countdownBar" style="display:none;">
+    <div class="sf-announcement-inner">
+      <span class="sf-announcement-pulse"></span>
+      <span>🔥 Offre limitée — expire dans <strong id="countdownTimer">15:00</strong></span>
+    </div>
   </div>
 
+  <!-- HEADER ───────────────────────────────── -->
+  <header class="sf-header" id="sfHeader" style="display:none;">
+    <div class="sf-header-inner">
+      <a class="sf-brand" href="#">
+        <span class="sf-brand-icon" id="brandIcon">🏪</span>
+        <span class="sf-brand-name" id="brandName">Boutique</span>
+      </a>
+      <div class="sf-header-trust">
+        <span class="sf-header-badge">🔒 Paiement sécurisé</span>
+        <span class="sf-header-badge sf-hide-mobile">🚚 Livraison offerte</span>
+      </div>
+    </div>
+  </header>
+
   <!-- LOADING STATE ────────────────────────── -->
-  <div class="storefront-loader" id="loader">
-    <div class="spinner"></div>
+  <div class="sf-loader" id="loader">
+    <div class="sf-loader-spinner"></div>
     <p>Chargement de la boutique...</p>
   </div>
 
   <!-- 404 STATE ────────────────────────────── -->
-  <div class="storefront-404" id="notFound" style="display:none;">
+  <div class="sf-empty" id="notFound" style="display:none;">
+    <div class="sf-empty-icon">🔍</div>
     <h1>Boutique introuvable</h1>
     <p>Cette boutique n'existe pas ou n'est plus disponible.</p>
-    <a href="https://scalevo.shop" class="btn btn-primary">Retour à Scalevo</a>
+    <a href="https://scalevo.shop" class="sf-btn sf-btn-primary">Retour à Scalevo</a>
   </div>
 
-  <!-- MAIN PRODUCT PAGE ────────────────────── -->
+  <!-- ═══════════════════════════════════════════
+       MAIN PRODUCT PAGE
+       ═══════════════════════════════════════════ -->
   <div id="productPage" style="display:none;">
+
     <!-- HERO ───────────────────────────────── -->
     <section class="sf-hero">
-      <div class="sf-container sf-hero-grid">
+      <div class="sf-container sf-hero-layout">
         <!-- Gallery -->
         <div class="sf-gallery">
-          <div class="sf-gallery-main">
-            <img id="mainImage" src="" alt="">
+          <div class="sf-gallery-main" id="galleryMain">
+            <img id="mainImage" src="" alt="" class="sf-gallery-img">
+            <span class="sf-gallery-badge" id="discountBadge" style="display:none;"></span>
+            <button class="sf-gallery-nav sf-gallery-prev" id="galleryPrev" style="display:none;" onclick="galleryNav(-1)">‹</button>
+            <button class="sf-gallery-nav sf-gallery-next" id="galleryNext" style="display:none;" onclick="galleryNav(1)">›</button>
           </div>
           <div class="sf-gallery-thumbs" id="thumbs"></div>
         </div>
+
         <!-- Product Info -->
-        <div class="sf-product-info">
-          <h1 id="productName"></h1>
-          <div class="sf-price">
-            <span class="sf-price-current" id="priceDisplay"></span>
-            <span class="sf-price-compare" id="comparePriceDisplay"></span>
-            <span class="sf-price-badge" id="discountBadge" style="display:none;"></span>
-          </div>
-          <div class="sf-features" id="featuresDisplay"></div>
+        <div class="sf-info">
+          <div class="sf-info-scroll">
+            <!-- Rating -->
+            <div class="sf-rating" id="ratingSection">
+              <div class="sf-stars">★★★★★</div>
+              <span class="sf-rating-count">(127 avis)</span>
+            </div>
 
-          <!-- Bundles -->
-          <div class="sf-bundles" id="bundlesSection" style="display:none;">
-            <h3>Choisissez votre offre :</h3>
-            <div id="bundlesList"></div>
-          </div>
+            <h1 class="sf-product-name" id="productName"></h1>
 
-          <!-- Order Bump -->
-          <div class="sf-order-bump" id="bumpSection" style="display:none;">
-            <label class="sf-bump-label">
-              <input type="checkbox" id="bumpCheckbox">
-              <div class="sf-bump-content">
-                <strong id="bumpTitle"></strong>
-                <span id="bumpDesc"></span>
+            <div class="sf-price-block">
+              <span class="sf-price" id="priceDisplay"></span>
+              <span class="sf-price-old" id="comparePriceDisplay"></span>
+              <span class="sf-price-save" id="saveDisplay" style="display:none;"></span>
+            </div>
+
+            <!-- Short desc -->
+            <p class="sf-short-desc" id="shortDesc" style="display:none;"></p>
+
+            <!-- Features -->
+            <div class="sf-features" id="featuresDisplay"></div>
+
+            <!-- Bundles -->
+            <div class="sf-bundles" id="bundlesSection" style="display:none;">
+              <p class="sf-bundles-label">Choisissez votre offre :</p>
+              <div id="bundlesList"></div>
+            </div>
+
+            <!-- Order Bump -->
+            <div class="sf-bump" id="bumpSection" style="display:none;">
+              <label class="sf-bump-label">
+                <input type="checkbox" id="bumpCheckbox">
+                <span class="sf-bump-check">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>
+                </span>
+                <div class="sf-bump-text">
+                  <strong id="bumpTitle"></strong>
+                  <span id="bumpDesc"></span>
+                </div>
                 <span class="sf-bump-price" id="bumpPriceDisplay"></span>
+              </label>
+            </div>
+
+            <!-- CTA -->
+            <button class="sf-cta" id="ctaBtn" onclick="startCheckout()">
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 002 1.61h9.72a2 2 0 002-1.61L23 6H6"/></svg>
+              Commander maintenant — <span id="ctaPrice"></span>
+            </button>
+
+            <!-- Trust row -->
+            <div class="sf-trust-row">
+              <div class="sf-trust-item">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0110 0v4"/></svg>
+                <span>Paiement<br>sécurisé</span>
               </div>
-            </label>
+              <div class="sf-trust-item">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="1" y="3" width="15" height="13"/><polygon points="16 8 20 8 23 11 23 16 16 16 16 8"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/></svg>
+                <span>Livraison<br>offerte</span>
+              </div>
+              <div class="sf-trust-item">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+                <span>Garantie<br>30 jours</span>
+              </div>
+              <div class="sf-trust-item">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+                <span>Stock<br>limité</span>
+              </div>
+            </div>
+
+            <!-- Payment icons -->
+            <div class="sf-payment-icons">
+              <span class="sf-pay-label">Moyens de paiement acceptés</span>
+              <div class="sf-pay-row">
+                <div class="sf-pay-icon">💳 Visa</div>
+                <div class="sf-pay-icon">💳 Mastercard</div>
+                <div class="sf-pay-icon">💳 CB</div>
+                <div class="sf-pay-icon">🍎 Apple Pay</div>
+              </div>
+            </div>
           </div>
+        </div>
+      </div>
+    </section>
 
-          <!-- CTA -->
-          <button class="sf-cta-btn" id="ctaBtn" onclick="startCheckout()">
-            🛒 Commander maintenant
-          </button>
-
-          <!-- Trust badges -->
-          <div class="sf-trust-badges">
-            <div class="sf-trust-badge">🔒 Paiement sécurisé</div>
-            <div class="sf-trust-badge">🚚 Livraison offerte</div>
-            <div class="sf-trust-badge">↩️ Satisfait ou remboursé</div>
+    <!-- SOCIAL PROOF BAR ───────────────────── -->
+    <section class="sf-social-bar">
+      <div class="sf-container">
+        <div class="sf-social-bar-inner">
+          <div class="sf-social-stat">
+            <strong>1 247</strong>
+            <span>commandes</span>
+          </div>
+          <div class="sf-social-divider"></div>
+          <div class="sf-social-stat">
+            <strong>4.8/5</strong>
+            <span>note moyenne</span>
+          </div>
+          <div class="sf-social-divider"></div>
+          <div class="sf-social-stat">
+            <strong>98%</strong>
+            <span>satisfaction</span>
           </div>
         </div>
       </div>
@@ -85,77 +176,167 @@
 
     <!-- DESCRIPTION ────────────────────────── -->
     <section class="sf-section" id="descriptionSection" style="display:none;">
-      <div class="sf-container">
-        <h2>À propos du produit</h2>
-        <div id="descriptionContent" class="sf-description"></div>
+      <div class="sf-container sf-section-narrow">
+        <h2 class="sf-section-title">À propos du produit</h2>
+        <div id="descriptionContent" class="sf-description-text"></div>
       </div>
     </section>
 
-    <!-- GUARANTEE ──────────────────────────── -->
-    <section class="sf-guarantee">
+    <!-- WHY US ─────────────────────────────── -->
+    <section class="sf-section sf-section-alt">
       <div class="sf-container">
-        <div class="sf-guarantee-box">
-          <div class="sf-guarantee-icon">🛡️</div>
-          <h3>Garantie satisfaction 30 jours</h3>
-          <p>Si tu n'es pas satisfait, on te rembourse sans poser de questions. Zéro risque.</p>
+        <h2 class="sf-section-title">Pourquoi nous choisir</h2>
+        <div class="sf-advantages-grid">
+          <div class="sf-advantage">
+            <div class="sf-advantage-icon">🚚</div>
+            <h3>Livraison gratuite</h3>
+            <p>Expédition sous 24h et livraison en 7-14 jours dans toute la France.</p>
+          </div>
+          <div class="sf-advantage">
+            <div class="sf-advantage-icon">🛡️</div>
+            <h3>Garantie 30 jours</h3>
+            <p>Remboursement intégral sans condition si tu n'es pas satisfait.</p>
+          </div>
+          <div class="sf-advantage">
+            <div class="sf-advantage-icon">🔒</div>
+            <h3>Paiement sécurisé</h3>
+            <p>Transactions cryptées SSL via Stripe, leader mondial du paiement.</p>
+          </div>
+          <div class="sf-advantage">
+            <div class="sf-advantage-icon">📞</div>
+            <h3>Support réactif</h3>
+            <p>Une question ? Notre équipe te répond en moins de 24h par email.</p>
+          </div>
         </div>
       </div>
     </section>
 
     <!-- REVIEWS ────────────────────────────── -->
-    <section class="sf-section sf-reviews-section">
+    <section class="sf-section">
       <div class="sf-container">
-        <h2>Ce que disent nos clients</h2>
+        <h2 class="sf-section-title">Ce que disent nos clients</h2>
         <div class="sf-reviews-grid">
-          <div class="sf-review">
-            <div class="sf-review-stars">★★★★★</div>
-            <p>"Produit top qualité, je recommande à 100% !"</p>
-            <strong>Marie P.</strong>
+          <div class="sf-review-card">
+            <div class="sf-review-head">
+              <div class="sf-review-avatar">M</div>
+              <div>
+                <strong>Marie P.</strong>
+                <div class="sf-review-stars">★★★★★</div>
+              </div>
+              <span class="sf-review-verified">✓ Achat vérifié</span>
+            </div>
+            <p>"Produit de super qualité, livraison rapide. Je recommande à 100% !"</p>
           </div>
-          <div class="sf-review">
-            <div class="sf-review-stars">★★★★★</div>
-            <p>"Livraison rapide et conforme à la description. Très content."</p>
-            <strong>Thomas R.</strong>
+          <div class="sf-review-card">
+            <div class="sf-review-head">
+              <div class="sf-review-avatar">T</div>
+              <div>
+                <strong>Thomas R.</strong>
+                <div class="sf-review-stars">★★★★★</div>
+              </div>
+              <span class="sf-review-verified">✓ Achat vérifié</span>
+            </div>
+            <p>"Conforme à la description, très bon rapport qualité/prix. Je recommande."</p>
           </div>
-          <div class="sf-review">
-            <div class="sf-review-stars">★★★★★</div>
-            <p>"Super rapport qualité/prix. J'en ai commandé 2 de plus !"</p>
-            <strong>Sophie M.</strong>
+          <div class="sf-review-card">
+            <div class="sf-review-head">
+              <div class="sf-review-avatar">S</div>
+              <div>
+                <strong>Sophie M.</strong>
+                <div class="sf-review-stars">★★★★★</div>
+              </div>
+              <span class="sf-review-verified">✓ Achat vérifié</span>
+            </div>
+            <p>"J'en ai commandé 2 de plus tellement j'étais contente. Merci !"</p>
+          </div>
+          <div class="sf-review-card">
+            <div class="sf-review-head">
+              <div class="sf-review-avatar">L</div>
+              <div>
+                <strong>Lucas D.</strong>
+                <div class="sf-review-stars">★★★★<span style="opacity:0.3">★</span></div>
+              </div>
+              <span class="sf-review-verified">✓ Achat vérifié</span>
+            </div>
+            <p>"Beau produit, bien emballé. Petit délai de livraison mais rien de grave."</p>
           </div>
         </div>
       </div>
     </section>
 
     <!-- FAQ ─────────────────────────────────── -->
-    <section class="sf-section sf-faq-section">
-      <div class="sf-container">
-        <h2>Questions fréquentes</h2>
+    <section class="sf-section sf-section-alt" id="faqSection">
+      <div class="sf-container sf-section-narrow">
+        <h2 class="sf-section-title">Questions fréquentes</h2>
         <div class="sf-faq-list">
           <div class="sf-faq-item">
-            <button class="sf-faq-question" onclick="toggleFaq(this)">
-              Quels sont les délais de livraison ? <span class="sf-faq-arrow">▾</span>
+            <button class="sf-faq-q" onclick="toggleFaq(this)">
+              <span>Quels sont les délais de livraison ?</span>
+              <svg class="sf-faq-chevron" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
             </button>
-            <div class="sf-faq-answer">La livraison prend entre 7 et 14 jours ouvrés. Vous recevrez un email avec le numéro de suivi dès l'expédition.</div>
+            <div class="sf-faq-a"><p>La livraison prend entre 7 et 14 jours ouvrés. Vous recevrez un email avec le numéro de suivi dès l'expédition.</p></div>
           </div>
           <div class="sf-faq-item">
-            <button class="sf-faq-question" onclick="toggleFaq(this)">
-              Comment fonctionne le remboursement ? <span class="sf-faq-arrow">▾</span>
+            <button class="sf-faq-q" onclick="toggleFaq(this)">
+              <span>Comment fonctionne le remboursement ?</span>
+              <svg class="sf-faq-chevron" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
             </button>
-            <div class="sf-faq-answer">Contactez-nous dans les 30 jours suivant la réception. Nous vous remboursons intégralement sans condition.</div>
+            <div class="sf-faq-a"><p>Contactez-nous dans les 30 jours suivant la réception. Nous vous remboursons intégralement sans questions ni conditions.</p></div>
           </div>
           <div class="sf-faq-item">
-            <button class="sf-faq-question" onclick="toggleFaq(this)">
-              Le paiement est-il sécurisé ? <span class="sf-faq-arrow">▾</span>
+            <button class="sf-faq-q" onclick="toggleFaq(this)">
+              <span>Le paiement est-il sécurisé ?</span>
+              <svg class="sf-faq-chevron" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
             </button>
-            <div class="sf-faq-answer">Oui, tous les paiements sont traités par Stripe, le leader mondial du paiement en ligne. Vos données bancaires sont 100% sécurisées.</div>
+            <div class="sf-faq-a"><p>Oui, tous les paiements sont traités par Stripe, le leader mondial du paiement en ligne. Vos données bancaires sont 100% sécurisées et cryptées.</p></div>
+          </div>
+          <div class="sf-faq-item">
+            <button class="sf-faq-q" onclick="toggleFaq(this)">
+              <span>Puis-je suivre ma commande ?</span>
+              <svg class="sf-faq-chevron" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
+            </button>
+            <div class="sf-faq-a"><p>Oui, un numéro de tracking vous sera envoyé par email dès que votre commande sera expédiée. Vous pourrez suivre votre colis en temps réel.</p></div>
           </div>
         </div>
       </div>
     </section>
 
+    <!-- FINAL CTA ──────────────────────────── -->
+    <section class="sf-final-cta">
+      <div class="sf-container" style="text-align:center;">
+        <h2>Ne ratez pas cette offre</h2>
+        <p>Commandez maintenant et recevez votre produit rapidement.</p>
+        <button class="sf-cta" style="max-width:420px; margin:0 auto;" onclick="window.scrollTo({top:0,behavior:'smooth'})">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 002 1.61h9.72a2 2 0 002-1.61L23 6H6"/></svg>
+          Je commande maintenant
+        </button>
+      </div>
+    </section>
+
+    <!-- FOOTER ─────────────────────────────── -->
+    <footer class="sf-footer">
+      <div class="sf-container">
+        <div class="sf-footer-inner">
+          <div class="sf-footer-brand">
+            <span class="sf-brand-icon" id="footerBrandIcon">🏪</span>
+            <span class="sf-brand-name" id="footerBrandName">Boutique</span>
+          </div>
+          <div class="sf-footer-links">
+            <a href="#" onclick="document.getElementById('faqSection').scrollIntoView({behavior:'smooth'});return false;">FAQ</a>
+            <a href="mailto:contact@scalevo.shop">Contact</a>
+          </div>
+          <div class="sf-footer-copy">
+            © <span id="footerYear">2026</span> <span id="footerCopy">Boutique</span> — Propulsé par <a href="https://scalevo.shop" target="_blank" rel="noopener">Scalevo</a>
+          </div>
+        </div>
+      </div>
+    </footer>
+
     <!-- STICKY MOBILE CTA ──────────────────── -->
-    <div class="sf-sticky-cta">
-      <button class="sf-cta-btn" onclick="startCheckout()">🛒 Commander maintenant — <span id="stickyPrice"></span></button>
+    <div class="sf-sticky-cta" id="stickyCta">
+      <button class="sf-cta sf-cta-sticky" onclick="startCheckout()">
+        🛒 Commander — <span id="stickyPrice"></span>
+      </button>
     </div>
   </div>
 
@@ -172,42 +353,50 @@
     let funnelData = null;
     let selectedBundle = null;
     let bumpSelected = false;
+    let currentImgIndex = 0;
+    let allImages = [];
 
     function toggleFaq(btn) {
-      btn.parentElement.classList.toggle('open');
+      const item = btn.parentElement;
+      const isOpen = item.classList.contains('open');
+      document.querySelectorAll('.sf-faq-item').forEach(i => i.classList.remove('open'));
+      if (!isOpen) item.classList.add('open');
+    }
+
+    function galleryNav(dir) {
+      currentImgIndex += dir;
+      if (currentImgIndex < 0) currentImgIndex = allImages.length - 1;
+      if (currentImgIndex >= allImages.length) currentImgIndex = 0;
+      setGalleryImage(currentImgIndex);
+    }
+
+    function setGalleryImage(index) {
+      currentImgIndex = index;
+      document.getElementById('mainImage').src = allImages[index];
+      document.querySelectorAll('.sf-thumb').forEach((t, i) => t.classList.toggle('active', i === index));
     }
 
     function selectBundle(index) {
-      document.querySelectorAll('.sf-bundle-option').forEach((el, i) => {
-        el.classList.toggle('selected', i === index);
-      });
+      document.querySelectorAll('.sf-bundle-option').forEach((el, i) => el.classList.toggle('selected', i === index));
       selectedBundle = funnelData.bundles[index];
       updatePrice();
     }
 
     function updatePrice() {
       let basePrice = productData.price;
-      let label = Utils.formatPrice(basePrice);
-
-      if (selectedBundle) {
-        basePrice = selectedBundle.unitPrice * selectedBundle.qty;
-        label = Utils.formatPrice(basePrice);
-      }
-
+      if (selectedBundle) basePrice = selectedBundle.unitPrice * selectedBundle.qty;
       let total = basePrice;
-      if (bumpSelected && funnelData?.orderBump?.price) {
-        total += funnelData.orderBump.price;
-      }
-
-      document.getElementById('priceDisplay').textContent = Utils.formatPrice(total);
-      document.getElementById('stickyPrice').textContent = Utils.formatPrice(total);
+      if (bumpSelected && funnelData?.orderBump?.price) total += funnelData.orderBump.price;
+      const label = Utils.formatPrice(total);
+      document.getElementById('priceDisplay').textContent = label;
+      document.getElementById('stickyPrice').textContent = label;
+      document.getElementById('ctaPrice').textContent = label;
     }
 
     async function startCheckout() {
       const btn = document.getElementById('ctaBtn');
       btn.disabled = true;
-      btn.textContent = 'Redirection vers le paiement...';
-
+      btn.innerHTML = '<span class="sf-cta-spinner"></span> Redirection...';
       try {
         const body = {
           storeId: storeData.id,
@@ -217,43 +406,37 @@
           successUrl: window.location.origin + '/success.html?store=' + storeData.id,
           cancelUrl: window.location.href
         };
-
-        const res = await fetch('/api/createStoreCheckoutSession', {
+        const res = await fetch('/.netlify/functions/createStoreCheckoutSession', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(body)
         });
         const data = await res.json();
         if (!res.ok) throw new Error(data.error || 'Erreur checkout');
-
         const stripe = getStripeForStore(storeData.stripePublishableKey);
         await stripe.redirectToCheckout({ sessionId: data.sessionId });
       } catch(e) {
         alert('Erreur: ' + e.message);
         btn.disabled = false;
-        btn.textContent = '🛒 Commander maintenant';
+        btn.innerHTML = '🛒 Commander maintenant';
       }
     }
 
-    // ─── Countdown ───
     function startCountdown(minutes) {
       document.getElementById('countdownBar').style.display = '';
       let seconds = minutes * 60;
       const timerEl = document.getElementById('countdownTimer');
-      const interval = setInterval(() => {
+      setInterval(() => {
         seconds--;
-        if (seconds <= 0) { clearInterval(interval); return; }
+        if (seconds <= 0) return;
         const m = Math.floor(seconds / 60);
         const s = seconds % 60;
         timerEl.textContent = m.toString().padStart(2, '0') + ':' + s.toString().padStart(2, '0');
       }, 1000);
     }
 
-    // ─── INIT ───
     async function init() {
       const slug = StoreResolver.getSlug();
-
-      // If no slug, we might be on a direct URL — try query param
       const urlSlug = slug || new URLSearchParams(window.location.search).get('slug');
 
       if (!urlSlug) {
@@ -262,7 +445,6 @@
         return;
       }
 
-      // Resolve slug → storeId
       const storeId = await StoreResolver.resolve(urlSlug);
       if (!storeId) {
         document.getElementById('loader').style.display = 'none';
@@ -270,7 +452,6 @@
         return;
       }
 
-      // Load store
       storeData = await StoreResolver.loadStore(storeId);
       if (!storeData || !storeData.published) {
         document.getElementById('loader').style.display = 'none';
@@ -278,7 +459,6 @@
         return;
       }
 
-      // Load product
       productData = await StoreResolver.loadProduct(storeId);
       if (!productData) {
         document.getElementById('loader').style.display = 'none';
@@ -286,52 +466,70 @@
         return;
       }
 
-      // Load funnel
       funnelData = await StoreResolver.loadFunnel(storeId);
 
-      // Apply theme color
+      // Theme color
       if (storeData.primaryColor) {
         document.documentElement.style.setProperty('--sf-primary', storeData.primaryColor);
       }
 
+      // Header
+      document.getElementById('sfHeader').style.display = '';
+      const initial = (storeData.name || 'B').charAt(0).toUpperCase();
+      document.getElementById('brandIcon').textContent = initial;
+      document.getElementById('brandIcon').style.background = storeData.primaryColor || 'var(--sf-primary)';
+      document.getElementById('brandName').textContent = storeData.name;
+      document.getElementById('footerBrandIcon').textContent = initial;
+      document.getElementById('footerBrandIcon').style.background = storeData.primaryColor || 'var(--sf-primary)';
+      document.getElementById('footerBrandName').textContent = storeData.name;
+      document.getElementById('footerCopy').textContent = storeData.name;
+
       // Title
       document.getElementById('pageTitle').textContent = productData.name + ' — ' + storeData.name;
       document.getElementById('pageMeta').content = productData.description || '';
-
-      // Product name
       document.getElementById('productName').textContent = productData.name;
 
       // Price
       document.getElementById('priceDisplay').textContent = Utils.formatPrice(productData.price);
       document.getElementById('stickyPrice').textContent = Utils.formatPrice(productData.price);
+      document.getElementById('ctaPrice').textContent = Utils.formatPrice(productData.price);
       if (productData.comparePrice && productData.comparePrice > productData.price) {
         document.getElementById('comparePriceDisplay').textContent = Utils.formatPrice(productData.comparePrice);
         const discount = Math.round((1 - productData.price / productData.comparePrice) * 100);
         document.getElementById('discountBadge').textContent = '-' + discount + '%';
         document.getElementById('discountBadge').style.display = '';
+        const saved = productData.comparePrice - productData.price;
+        document.getElementById('saveDisplay').textContent = 'Tu économises ' + Utils.formatPrice(saved);
+        document.getElementById('saveDisplay').style.display = '';
       }
 
       // Gallery
       if (productData.images && productData.images.length > 0) {
-        document.getElementById('mainImage').src = productData.images[0];
+        allImages = productData.images;
+        document.getElementById('mainImage').src = allImages[0];
         document.getElementById('mainImage').alt = productData.name;
-        document.getElementById('thumbs').innerHTML = productData.images.map((img, i) => `
-          <img src="${Utils.escapeHtml(img)}" alt="" class="sf-thumb ${i === 0 ? 'active' : ''}"
-               onclick="document.getElementById('mainImage').src='${Utils.escapeHtml(img)}'; document.querySelectorAll('.sf-thumb').forEach(t=>t.classList.remove('active')); this.classList.add('active');">
-        `).join('');
+        if (allImages.length > 1) {
+          document.getElementById('galleryPrev').style.display = '';
+          document.getElementById('galleryNext').style.display = '';
+        }
+        document.getElementById('thumbs').innerHTML = allImages.map((img, i) =>
+          `<img src="${Utils.escapeHtml(img)}" alt="" class="sf-thumb ${i === 0 ? 'active' : ''}" onclick="setGalleryImage(${i})">`
+        ).join('');
+      }
+
+      // Short desc
+      if (productData.description) {
+        document.getElementById('shortDesc').textContent = productData.description;
+        document.getElementById('shortDesc').style.display = '';
+        document.getElementById('descriptionSection').style.display = '';
+        document.getElementById('descriptionContent').textContent = productData.description;
       }
 
       // Features
       if (productData.features && productData.features.length > 0) {
         document.getElementById('featuresDisplay').innerHTML = productData.features.map(f =>
-          `<div class="sf-feature">${Utils.escapeHtml(f)}</div>`
+          `<div class="sf-feature"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--sf-primary)" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg> ${Utils.escapeHtml(f)}</div>`
         ).join('');
-      }
-
-      // Description
-      if (productData.description) {
-        document.getElementById('descriptionSection').style.display = '';
-        document.getElementById('descriptionContent').textContent = productData.description;
       }
 
       // Bundles
@@ -365,13 +563,12 @@
       }
 
       // Countdown
-      if (funnelData?.countdownMinutes) {
-        startCountdown(funnelData.countdownMinutes);
-      }
+      if (funnelData?.countdownMinutes) startCountdown(funnelData.countdownMinutes);
 
-      // Show page
+      // Show
       document.getElementById('loader').style.display = 'none';
       document.getElementById('productPage').style.display = '';
+      document.getElementById('footerYear').textContent = new Date().getFullYear();
     }
 
     init();
