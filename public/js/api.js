@@ -3,8 +3,8 @@
    ═══════════════════════════════════════════════ */
 
 const API = {
-  // Base URL for Cloud Functions
-  base: '',  // Will be set to functions URL or '/api'
+  // Base URL for Netlify Functions
+  base: '/.netlify/functions',
 
   async _call(endpoint, body = {}, auth_required = true) {
     const headers = { 'Content-Type': 'application/json' };
@@ -13,7 +13,7 @@ const API = {
       if (!token) throw new Error('Non authentifié');
       headers['Authorization'] = `Bearer ${token}`;
     }
-    const res = await fetch(`/api/${endpoint}`, {
+    const res = await fetch(`${this.base}/${endpoint}`, {
       method: 'POST',
       headers,
       body: JSON.stringify(body),
