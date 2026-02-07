@@ -19,7 +19,7 @@ const ROOT_DOMAIN = "scalevo.shop";
 
 // Initialize Firebase
 firebase.initializeApp(FIREBASE_CONFIG);
-const auth = firebase.auth();
+const auth = typeof firebase.auth === 'function' ? firebase.auth() : null;
 const db = firebase.firestore();
 
 // Stripe PLATEFORME (Scalevo) — pour les abonnements SaaS uniquement
