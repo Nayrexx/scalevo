@@ -17,7 +17,7 @@ exports.handler = async (event) => {
     };
 
     const priceId = prices[plan];
-    if (!priceId) return fail(400, 'Plan invalide');
+    if (!priceId) return fail(400, 'Plan invalide ou non configuré');
 
     // Get or create Stripe customer
     let customerId;
@@ -37,18 +37,18 @@ exports.handler = async (event) => {
       );
     }
 
-    const origin = event.headers.origin || event.headers.Origin || 'https://scalevo.shop';
+    const origin = event.headers.origin || event.headers.Origin || 'https://scalevo.netlify.app';
     const session = await stripe.checkout.sessions.create({
       customer: customerId,
       mode: 'subscription',
       payment_method_types: ['card'],
       line_items: [{ price: priceId, quantity: 1 }],
-      success_url: `${origin}/app/account.html?session_id={CHECKOUT_SESSION_ID}`,
-      cancel_url: `${origin}/app/account.html`,
+      ui_mode: 'embedded',
+      return_url: `${origin}/app/account.html?session_id={CHECKOUT_SESSION_ID}`,
       metadata: { firebaseUID: user.uid, plan },
     });
 
-    return ok({ sessionId: session.id });
+    return ok({ clientSecret: session.client_secret });
   } catch (err) {
     console.error('createSubscriptionCheckoutSession error:', err);
     return fail(err.statusCode || 500, err.message);

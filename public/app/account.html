@@ -62,10 +62,23 @@
                 </div>
                 <div id="subLimits" style="font-size:0.875rem; color:var(--text-secondary); margin-bottom:1rem;"></div>
               </div>
-              <div style="display:flex; gap:1rem; flex-wrap:wrap;">
-                <button class="btn btn-primary" id="upgradeBtn" onclick="subscribePlan('pro')">Upgrader en Pro (59€/mois)</button>
-                <button class="btn btn-outline" id="portalBtn" onclick="openBillingPortal()">Gérer la facturation</button>
+              <div id="planButtons" style="display:flex; gap:1rem; flex-wrap:wrap;">
+                <button class="btn btn-primary" id="upgradeBtn" onclick="openCheckout('starter')">Starter — 9€/mois</button>
+                <button class="btn btn-primary" id="upgradeProBtn" onclick="openCheckout('pro')">Pro — 29€/mois</button>
+                <button class="btn btn-primary" id="upgradeScaleBtn" onclick="openCheckout('scale')">Scale — 59€/mois</button>
+                <button class="btn btn-outline" id="portalBtn" onclick="openBillingPortal()" style="display:none;">Gérer la facturation</button>
               </div>
+            </div>
+          </div>
+
+          <!-- EMBEDDED CHECKOUT -->
+          <div class="card" id="checkoutCard" style="margin-bottom:2rem; display:none;">
+            <div class="card-body">
+              <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1rem;">
+                <h3>Paiement</h3>
+                <button class="btn btn-outline btn-sm" onclick="closeCheckout()">✕ Annuler</button>
+              </div>
+              <div id="checkout-container" style="min-height:300px;"></div>
             </div>
           </div>
         </div>
@@ -94,12 +107,32 @@
       document.getElementById('sidebarOverlay').classList.remove('visible');
     });
 
-    async function subscribePlan(plan) {
+    let embeddedCheckout = null;
+
+    async function openCheckout(plan) {
       try {
-        const { sessionId } = await API.createSubscriptionCheckout(plan);
+        // Close previous if any
+        if (embeddedCheckout) { embeddedCheckout.destroy(); embeddedCheckout = null; }
+
+        document.getElementById('checkoutCard').style.display = '';
+        document.getElementById('planButtons').style.display = 'none';
+        document.getElementById('checkout-container').innerHTML = '<div class="loading-spinner"><div class="spinner"></div></div>';
+
+        const { clientSecret } = await API.createSubscriptionCheckout(plan);
         const stripe = getStripePlatform();
-        await stripe.redirectToCheckout({ sessionId });
-      } catch(e) { Utils.toast('Erreur: ' + e.message, 'error'); }
+        embeddedCheckout = await stripe.initEmbeddedCheckout({ clientSecret });
+        document.getElementById('checkout-container').innerHTML = '';
+        embeddedCheckout.mount('#checkout-container');
+      } catch(e) {
+        Utils.toast('Erreur: ' + e.message, 'error');
+        closeCheckout();
+      }
+    }
+
+    function closeCheckout() {
+      if (embeddedCheckout) { embeddedCheckout.destroy(); embeddedCheckout = null; }
+      document.getElementById('checkoutCard').style.display = 'none';
+      document.getElementById('planButtons').style.display = '';
     }
 
     async function openBillingPortal() {
@@ -132,13 +165,21 @@
       document.getElementById('subPlan').textContent = planName.charAt(0).toUpperCase() + planName.slice(1);
       document.getElementById('subPlan').className = `badge ${planName === 'pro' ? 'badge-primary' : planName === 'scale' ? 'badge-success' : 'badge-outline'}`;
       document.getElementById('subStatus').textContent = sub?.status === 'active' ? 'Actif' : sub?.status || '';
-      document.getElementById('subLimits').textContent = `${limits.maxStores} boutique(s) · ${limits.maxProductsPerStore} produit(s)/boutique · ${limits.upsell ? 'Upsell activé' : 'Pas d\'upsell'}`;
+      document.getElementById('subLimits').textContent = `${limits.maxStores} boutique(s) max`;
 
-      if (planName === 'pro') {
-        document.getElementById('upgradeBtn').textContent = 'Upgrader en Scale (99€/mois)';
-        document.getElementById('upgradeBtn').onclick = () => subscribePlan('scale');
+      // Hide plans already below current, show portal if subscribed
+      if (planName === 'starter') {
+        document.getElementById('upgradeBtn').style.display = 'none';
+        document.getElementById('portalBtn').style.display = '';
+      } else if (planName === 'pro') {
+        document.getElementById('upgradeBtn').style.display = 'none';
+        document.getElementById('upgradeProBtn').style.display = 'none';
+        document.getElementById('portalBtn').style.display = '';
       } else if (planName === 'scale') {
         document.getElementById('upgradeBtn').style.display = 'none';
+        document.getElementById('upgradeProBtn').style.display = 'none';
+        document.getElementById('upgradeScaleBtn').style.display = 'none';
+        document.getElementById('portalBtn').style.display = '';
       }
 
       document.getElementById('loader').style.display = 'none';

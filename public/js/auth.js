@@ -87,9 +87,9 @@ const Auth = {
 
   getPlanLimits() {
     const limits = {
-      starter: { maxStores: 1, price: 29, label: 'Starter' },
-      pro:     { maxStores: 3, price: 59, label: 'Pro' },
-      scale:   { maxStores: 999, price: 99, label: 'Scale' },
+      starter: { maxStores: 1, price: 9, label: 'Starter' },
+      pro:     { maxStores: 3, price: 29, label: 'Pro' },
+      scale:   { maxStores: 999, price: 59, label: 'Scale' },
     };
     if (!this.subscription || this.subscription.status !== 'active') {
       return { maxStores: 0, price: 0, label: 'Aucun' };

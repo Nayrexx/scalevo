@@ -57,7 +57,23 @@
         </div>
         <div id="limitReached" class="empty-state" style="display:none;">
           <p style="color:var(--warning);">⚠️ Tu as atteint la limite de boutiques de ton plan.</p>
-          <button class="btn btn-primary" onclick="upgradePlan()">Upgrader mon plan</button>
+          <button class="btn btn-primary" onclick="openCheckoutModal()">Upgrader mon plan</button>
+        </div>
+
+        <!-- EMBEDDED CHECKOUT MODAL -->
+        <div id="checkoutOverlay" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,.7); z-index:1000; display:none; align-items:center; justify-content:center;">
+          <div style="background:var(--surface); border-radius:1rem; padding:2rem; width:95%; max-width:500px; max-height:90vh; overflow-y:auto; position:relative;">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1rem;">
+              <h3>Choisir un plan</h3>
+              <button class="btn btn-outline btn-sm" onclick="closeCheckoutModal()">✕</button>
+            </div>
+            <div id="planPicker" style="display:flex; flex-direction:column; gap:0.75rem;">
+              <button class="btn btn-primary" style="width:100%;" onclick="startCheckout('starter')">⚡ Starter — 9€/mois (1 boutique)</button>
+              <button class="btn btn-primary" style="width:100%;" onclick="startCheckout('pro')">🚀 Pro — 29€/mois (3 boutiques)</button>
+              <button class="btn btn-primary" style="width:100%;" onclick="startCheckout('scale')">💎 Scale — 59€/mois (illimité)</button>
+            </div>
+            <div id="checkout-embed" style="min-height:0;"></div>
+          </div>
         </div>
       </div>
     </main>
@@ -85,12 +101,32 @@
       document.getElementById('sidebarOverlay').classList.remove('visible');
     });
 
-    async function upgradePlan() {
+    let embeddedCheckout = null;
+
+    function openCheckoutModal() {
+      document.getElementById('checkoutOverlay').style.display = 'flex';
+      document.getElementById('planPicker').style.display = '';
+      document.getElementById('checkout-embed').innerHTML = '';
+    }
+    function closeCheckoutModal() {
+      if (embeddedCheckout) { embeddedCheckout.destroy(); embeddedCheckout = null; }
+      document.getElementById('checkoutOverlay').style.display = 'none';
+    }
+    async function startCheckout(plan) {
       try {
-        const { sessionId } = await API.createSubscriptionCheckout('pro');
+        document.getElementById('planPicker').style.display = 'none';
+        document.getElementById('checkout-embed').innerHTML = '<div class="loading-spinner" style="padding:2rem 0;"><div class="spinner"></div></div>';
+        document.getElementById('checkout-embed').style.minHeight = '350px';
+
+        const { clientSecret } = await API.createSubscriptionCheckout(plan);
         const stripe = getStripePlatform();
-        await stripe.redirectToCheckout({ sessionId });
-      } catch(e) { Utils.toast('Erreur: ' + e.message, 'error'); }
+        embeddedCheckout = await stripe.initEmbeddedCheckout({ clientSecret });
+        document.getElementById('checkout-embed').innerHTML = '';
+        embeddedCheckout.mount('#checkout-embed');
+      } catch(e) {
+        Utils.toast('Erreur: ' + e.message, 'error');
+        closeCheckoutModal();
+      }
     }
 
     Auth.init(async (user) => {
